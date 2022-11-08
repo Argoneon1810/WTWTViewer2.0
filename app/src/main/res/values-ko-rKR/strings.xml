@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WTWT 뷰어 2.0</string>
+    <string name="nav_option_all">모두</string>
+    <string name="nav_option_day">요일별</string>
+    <string name="nav_option_complete">완결</string>
+    <string name="nav_option_settings">설정</string>
+    <string name="hint_title">제목</string>
+    <string name="day_sun_short">일</string>
+    <string name="list_option_show_hidden">숨김 항목 표시</string>
+    <string name="list_option_show_completed">완결 항목 표시</string>
+    <string name="frag_title_all_list">모든 만화</string>
+    <string name="frag_title_by_day">연재일별 분류</string>
+    <string name="frag_title_completed">완결작</string>
+    <string name="frag_title_settings">설정</string>
+    <string name="day_mon_short">월</string>
+    <string name="day_tue_short">화</string>
+    <string name="day_wed_short">수</string>
+    <string name="day_thu_short">목</string>
+    <string name="day_fri_short">금</string>
+    <string name="day_sat_short">토</string>
+    <string name="pref_cat_entrypoints">진입점</string>
+    <string name="pref_desc_entrypoints">만화를 불러올 진입점을 선택해 주세요.</string>
+    <string name="pref_cat_backup_restore">백업 및 복원</string>
+    <string name="pref_btn_backup">백업</string>
+    <string name="pref_btn_restore">복원</string>
+    <string name="pref_btn_clear">초기화</string>
+    <string name="day_unspecified">비정기</string>
+    <string name="txt_plswait">잠시만 기다려 주십시오.</string>
+    <string name="dialog_from_web">웹에서 가져오기</string>
+    <string name="dialog_txt_url">링크 주소</string>
+    <string name="dialog_desc_addnew">새 항목 생성</string>
+    <string name="btn_web_addthispage">이 페이지 추가</string>
+    <string name="hint_toonid">작품 ID</string>
+    <string name="hint_epiid">에피소드 번호</string>
+    <string name="hint_toontype">작품 분류</string>
+    <string name="menu_edit">수정</string>
+    <string name="menu_delete">삭제</string>
+    <string name="action_set_hide">숨기기</string>
+    <string name="action_set_show">숨기기 해제</string>
+    <string name="frag_title_edit_entry">항목 수정</string>
+    <string name="frag_title_review_entry">신규 항목 확인</string>
+    <string name="frag_title_episode_list">에피소드 리스트</string>
+    <string name="frag_title_viewer">뷰어</string>
+    <string name="action_set_complete">완결작 등록</string>
+    <string name="action_set_incomplete">완결작 등록 해제</string>
+</resources>

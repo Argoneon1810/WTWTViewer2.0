@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="fab_mini_label_margin_end">72dp</dimen>
+    <dimen name="fab_mini_margin_end">24dp</dimen>
+    <dimen name="fab_mini_margin_bottom_1">80dp</dimen>
+    <dimen name="fab_mini_margin_bottom_2">128dp</dimen> <!-- add 40dp which is mini_fab's size, and then add 8dp which is desired margin in between -->
+    <dimen name="fab_mini_margin_bottom_3">176dp</dimen>
+
+    <dimen name="task_bar_height">24dp</dimen>
+    <dimen name="tool_bar_height">56dp</dimen>
+
+    <dimen name="pref_margin_start">70dp</dimen>
+
+    <dimen name="dialog_width">340dp</dimen>
+    <dimen name="dialog_height">190dp</dimen>
+    <dimen name="dev_target_device_width">411dp</dimen>
+    <dimen name="dev_target_device_height">891dp</dimen>
+</resources>

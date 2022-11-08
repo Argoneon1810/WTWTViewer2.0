@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="TextColorPrimaryInverseThemed" format="reference" />
+    <attr name="BackgroundDimmed" format="reference" />
+    <attr name="ButtonFocusedForegroundTransparent" format="reference" />
+    <attr name="CardBackground" format="reference" />
+</resources>

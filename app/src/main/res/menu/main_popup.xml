@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/menu_edit" />
+    <item android:title="@string/menu_delete" />
+    <item
+        android:id="@+id/action_completepopup"
+        android:title="@string/action_set_complete" />
+    <item
+        android:id="@+id/action_showhidepopup"
+        android:title="@string/action_set_hide" />
+</menu>

@@ -1,0 +1,28 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="@string/pref_key_root">
+    <PreferenceCategory
+        android:title="@string/pref_cat_entrypoints">
+        <ListPreference
+            android:key="@string/pref_key_entrypoint"
+            android:entries="@array/entry_points"
+            android:entryValues="@array/entry_points"
+            android:title="@string/pref_desc_entrypoints"
+            app:defaultValue="https://nicelink6.com/"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/pref_cat_backup_restore">
+        <Preference
+            android:key="@string/pref_key_btn_backup"
+            android:title="@string/pref_btn_backup" />
+        <Preference
+            android:key="@string/pref_key_btn_restore"
+            android:title="@string/pref_btn_restore" />
+        <Preference
+            android:key="@string/pref_key_btn_clear_all"
+            android:title="@string/pref_btn_clear" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

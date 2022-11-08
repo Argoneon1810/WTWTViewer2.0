@@ -1,0 +1,14 @@
+<resources>
+    <string-array name="entry_points">
+        <item name="1">https://nicelink1.com/</item>
+        <item name="2">https://nicelink2.com/</item>
+        <item name="3">https://nicelink3.com/</item>
+        <item name="4">https://nicelink4.com/</item>
+        <item name="5">https://nicelink5.com/</item>
+        <item name="6">https://nicelink6.com/</item>
+        <item name="7">https://nicelink7.com/</item>
+        <item name="8">https://nicelink8.com/</item>
+        <item name="9">https://nicelink9.com/</item>
+        <item name="10">https://nicelink10.com/</item>
+    </string-array>
+</resources>
