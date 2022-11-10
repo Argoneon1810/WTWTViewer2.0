@@ -24,5 +24,19 @@
             android:key="@string/pref_key_btn_clear_all"
             android:title="@string/pref_btn_clear" />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/pref_cat_restore_old">
+        <Preference
+            android:title="@string/txt_desc_restore_old" />
+        <Preference
+            android:key="@string/pref_btn_key_restore_old"
+            android:title="@string/btn_restore_old" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/pref_cat_rebuild_thumbnail">
+        <Preference
+            android:key="@string/pref_btn_key_rebuild_thumbnail"
+            android:title="@string/btn_rebuild_thumbnail" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

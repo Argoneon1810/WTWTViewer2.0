@@ -54,4 +54,16 @@
     <string name="txt_restore_successfully">성공적으로 복원했습니다</string>
     <string name="txt_restore_failed">복원에 실패했습니다</string>
     <string name="txt_backup_failed">백업에 실패했습니다</string>
+    <string name="dialog_body_warning">정말로 DB를 모두 초기화합니까?</string>
+    <string name="dialog_title_warning">경고!</string>
+    <string name="dialog_btn_cancel_positive">돌아가기</string>
+    <string name="dialog_btn_clear_negative">모두 지우기</string>
+    <string name="pref_cat_restore_old">구버전 복구</string>
+    <string name="txt_desc_restore_old">구버전 DB 지원 목적의 항목입니다. 이것이 무엇인지 잘 모르겠다면 무시하셔도 무방합니다.</string>
+    <string name="btn_restore_old">구버전 DB 복구</string>
+    <string name="txt_invalid_file_type">DB 백업 파일이 아닌 것 같습니다.</string>
+    <string name="btn_rebuild_thumbnail">모든 섬네일 다시 불러오기</string>
+    <string name="pref_cat_rebuild_thumbnail">섬네일 리빌드</string>
+    <string name="txt_rebuild_thumnail_complete">섬네일 리로드가 완료되었습니다</string>
+    <string name="txt_rebuild_thumnail_started">백그라운드에서 섬네일 리로드를 진행중입니다</string>
 </resources>
