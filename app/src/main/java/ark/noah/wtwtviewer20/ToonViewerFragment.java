@@ -1,5 +1,7 @@
 package ark.noah.wtwtviewer20;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
@@ -17,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import org.jsoup.Jsoup;
@@ -26,6 +29,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import ark.noah.wtwtviewer20.databinding.FragmentToonViewerBinding;
 
@@ -47,6 +51,7 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
     ToonsContainer oldContainerIfExists;
 
     boolean showNavigator = true;
+    int oldMargin = 0;
 
     public static ToonViewerFragment newInstance() {
         return new ToonViewerFragment();
@@ -168,13 +173,37 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
         public boolean onSingleTapUp(MotionEvent e) {
             if(showNavigator) {
                 showNavigator = false;
+                hideToolBar();
                 binding.viewerNavigator.setVisibility(View.INVISIBLE);
             } else {
                 showNavigator = true;
+                showToolBar();
                 binding.viewerNavigator.setVisibility(View.VISIBLE);
             }
             return super.onSingleTapUp(e);
         }
+    }
+
+    private void hideToolBar() {
+        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).hide();
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) binding.viewerRoot.getLayoutParams();
+        oldMargin = lp.topMargin;
+        lp.topMargin = 0;
+        binding.viewerRoot.setLayoutParams(lp);
+    }
+
+    private void showToolBar() {
+        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).show();
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) binding.viewerRoot.getLayoutParams();
+        lp.topMargin = oldMargin;
+        oldMargin = 0;
+        binding.viewerRoot.setLayoutParams(lp);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        showToolBar();
     }
 
     static class UnsupportedTypeException extends Exception {}
