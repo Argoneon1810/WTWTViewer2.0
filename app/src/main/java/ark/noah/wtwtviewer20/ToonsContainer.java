@@ -142,7 +142,7 @@ public class ToonsContainer implements Parcelable {
     }
 
     public boolean isSameToon(ToonsContainer other) {
-        return (other.dbID == dbID && other.toonID == toonID);
+        return ((other.dbID == dbID) && (other.toonID == toonID));
     }
 
     public enum ReleaseDay {
@@ -164,6 +164,22 @@ public class ToonsContainer implements Parcelable {
 
         public int getValue() {
             return val;
+        }
+
+        public int asFlag() {
+            return 1 << getValue();
+        }
+
+        public static int convertBitindexValueToNormal(int value) {
+            Log.i("DebugLog", "value: " + value);
+            if(value <= 0) return value;
+            int count = 0;
+            while(value != 1) {
+                value = (value >> 1);
+                ++count;
+            }
+            Log.i("DebugLog", "count: " + count);
+            return count;
         }
 
         public static ReleaseDay getDayFromCalendarDayOfWeek(int dayOfWeek) {

@@ -267,24 +267,36 @@ public class BackupRestoreDBManager implements ExecutorRunner.Callback<Pair<Inte
         epiidSub = epiidSub.substring(epiidSub.indexOf("=")+1).trim();
         epiid = Integer.parseInt(epiidSub);
 
-        if(hide_index == -1) {                                                  //compatibilty option (because the column 'hide' is added later.)
-            String releaseSub = value.substring(release_index);
-            releaseSub = releaseSub.substring(releaseSub.indexOf("=")+1).trim();
-            release = Integer.parseInt(releaseSub);
-        } else {
-            String releaseSub = value.substring(release_index, hide_index-1);
-            releaseSub = releaseSub.substring(releaseSub.indexOf("=")+1).trim();
-            release = Integer.parseInt(releaseSub);
-        }
+        String releaseSub = value.substring(release_index, hide_index-1);
+        releaseSub = releaseSub.substring(releaseSub.indexOf("=")+1).trim();
+        release = getCompatReleaseDays(Integer.parseInt(releaseSub));
 
-        if(hide_index == -1) {                                                  //compatibilty option (because the column 'hide' is added later.)
-            hide = false;
-        } else {
-            String hideSub = value.substring(hide_index);
-            hideSub = hideSub.substring(hideSub.indexOf("=") + 1).trim();
-            hide = Integer.parseInt(hideSub) != 0;
-        }
+        String hideSub = value.substring(hide_index);
+        hideSub = hideSub.substring(hideSub.indexOf("=") + 1).trim();
+        hide = Integer.parseInt(hideSub) != 0;
+
         return new ToonsContainer(dbid, title, type, toonid, epiid, release, hide, false, "");
+    }
+
+    private int getCompatReleaseDays(int flag) {
+        int OLD_SUN_FLAG = 0b1000000;
+        int OLD_MON_FLAG = 0b0100000;
+        int OLD_TUE_FLAG = 0b0010000;
+        int OLD_WED_FLAG = 0b0001000;
+        int OLD_THU_FLAG = 0b0000100;
+        int OLD_FRI_FLAG = 0b0000010;
+        int OLD_SAT_FLAG = 0b0000001;
+
+        int flags = 0;
+        if((flag & OLD_SUN_FLAG) != 0) flags += ToonsContainer.ReleaseDay.SUN.asFlag();
+        if((flag & OLD_MON_FLAG) != 0) flags += ToonsContainer.ReleaseDay.MON.asFlag();
+        if((flag & OLD_TUE_FLAG) != 0) flags += ToonsContainer.ReleaseDay.TUE.asFlag();
+        if((flag & OLD_WED_FLAG) != 0) flags += ToonsContainer.ReleaseDay.WED.asFlag();
+        if((flag & OLD_THU_FLAG) != 0) flags += ToonsContainer.ReleaseDay.THU.asFlag();
+        if((flag & OLD_FRI_FLAG) != 0) flags += ToonsContainer.ReleaseDay.FRI.asFlag();
+        if((flag & OLD_SAT_FLAG) != 0) flags += ToonsContainer.ReleaseDay.SAT.asFlag();
+
+        return flags;
     }
 
     @Override

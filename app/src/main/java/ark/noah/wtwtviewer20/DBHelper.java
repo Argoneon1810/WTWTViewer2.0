@@ -94,10 +94,10 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         else whereQueries.add(COL_COMPLETE + " IS " + 0);
 
-        if(releaseDay != ToonsContainer.ReleaseDay.NON && releaseDay != ToonsContainer.ReleaseDay.ALL)
+        if(releaseDay == ToonsContainer.ReleaseDay.NON)
+            whereQueries.add(COL_RELEASEDAY + " IS " + 0);
+        else if(releaseDay != ToonsContainer.ReleaseDay.ALL)
             whereQueries.add("( " + COL_RELEASEDAY + " & " + (1 << releaseDay.getValue()) + " ) IS NOT " + 0);
-        else if(releaseDay == ToonsContainer.ReleaseDay.NON)
-            whereQueries.add("( " + COL_RELEASEDAY + " & " + (1 << releaseDay.getValue()) + " ) IS " + 0);
 
         StringBuilder toReturn = new StringBuilder(baseQuery);
         for(int i = 0; i < whereQueries.size(); ++i) {
