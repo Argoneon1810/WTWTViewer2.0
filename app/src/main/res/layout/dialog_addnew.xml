@@ -34,10 +34,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        android:autofillHints="@string/dialog_txt_url"
         android:ems="10"
-        android:inputType="textPersonName"
+        android:hint="@string/dialog_txt_url"
+        android:inputType="textUri"
         android:minHeight="48dp"
-        android:text="@string/dialog_txt_url"
         app:layout_constraintBottom_toTopOf="@id/btn_dialog_fromWeb"
         app:layout_constraintTop_toBottomOf="@+id/txt_dialog_desc_addnew"
         tools:layout_editor_absoluteX="16dp" />

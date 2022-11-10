@@ -2,11 +2,14 @@ package ark.noah.wtwtviewer20;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
 public class ToonsContainer implements Parcelable {
+    boolean isDebug = true;
+
     public int dbID;
     public String toonName, toonType, thumbnailURL;
     public int toonID, episodeID, releaseWeekdays;
@@ -23,6 +26,8 @@ public class ToonsContainer implements Parcelable {
             boolean completed,
             String thumbnailURL
     ) {
+        isDebug = MainActivity.Instance.isDebug;
+
         this.dbID = dbID;
         this.toonName = toonName;
         this.toonType = toonType;
@@ -65,7 +70,7 @@ public class ToonsContainer implements Parcelable {
     }
 
     /**
-     * @param flag
+     * @param flag an 1 that is bit-shifted leftward in an amount of ReleaseDay.getValue()
      * @return true if inserted, false if removed
      */
     public boolean tryChangeFlagWeekday(int flag) {
@@ -106,15 +111,49 @@ public class ToonsContainer implements Parcelable {
         return releaseDays;
     }
 
+    public String asLink() {
+        String link = LinkGetter.Instance.getEntryPoint() + toonType + 2 + "?toon=" + toonID + "&num=" + episodeID;
+        if(isDebug) Log.i("DebugLog", link);
+        return link;
+    }
+
+    public ToonsContainer getNext() {
+        return new ToonsContainer(dbID, toonName, toonType, toonID, episodeID + 1, releaseWeekdays, hide, completed, thumbnailURL);
+    }
+
+    public ToonsContainer getPrev() {
+        return new ToonsContainer(dbID, toonName, toonType, toonID, episodeID - 1, releaseWeekdays, hide, completed, thumbnailURL);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof ToonsContainer) {
+            ToonsContainer other = (ToonsContainer) o;
+            if(!isSameToon(other)) return false;
+            if(other.episodeID != episodeID) return false;
+            if(!other.toonType.equals(toonType)) return false;
+            if(other.releaseWeekdays!=releaseWeekdays) return false;
+            if(other.hide != hide) return false;
+            if(other.completed != completed) return false;
+            if(!other.thumbnailURL.equals(thumbnailURL)) return false;
+            if(!other.toonName.equals(toonName)) return false;
+        }
+        return super.equals(o);
+    }
+
+    public boolean isSameToon(ToonsContainer other) {
+        return (other.dbID == dbID && other.toonID == toonID);
+    }
+
     public enum ReleaseDay {
-        SUN(0),
-        MON(1),
-        TUE(2),
-        WED(3),
-        THU(4),
-        FRI(5),
-        SAT(6),
-        NON(7),
+        NON(0),
+        SUN(1),
+        MON(2),
+        TUE(3),
+        WED(4),
+        THU(5),
+        FRI(6),
+        SAT(7),
         ALL(8);
 
         private final int val;

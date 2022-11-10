@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 public class EpisodesAdapter extends RecyclerView.Adapter<EpisodesAdapter.ViewHolder> {
     private ArrayList<EpisodesContainer> mData;
+
     private OnItemClickListener mOnItemClickListener;
     private IDDifferenceCallback callback;
 
@@ -76,6 +77,26 @@ public class EpisodesAdapter extends RecyclerView.Adapter<EpisodesAdapter.ViewHo
                     callback.onIDDifferent(currentID);
             mOnItemClickListener.onClick(v, position);
         });
+    }
+
+    public void addAtFront(ArrayList<EpisodesContainer> episodesContainers) {
+        mData.addAll(0, episodesContainers);
+        notifyItemRangeInserted(0, episodesContainers.size());
+    }
+
+    public void updateCurrentToon(ToonsContainer toonsContainer) {
+        int prev = getPositionOfEpisode(currentToon.episodeID);
+        int curr = getPositionOfEpisode(toonsContainer.episodeID);
+        currentToon = toonsContainer;
+        if(prev!=-1) notifyItemChanged(prev);
+        if(curr!=-1) notifyItemChanged(curr);
+    }
+
+    public int getPositionOfEpisode(int episodeID) {
+        for(int i = 0; i < mData.size(); ++i)
+            if(mData.get(i).number == episodeID)
+                return i;
+        return -1;
     }
 
     @Override

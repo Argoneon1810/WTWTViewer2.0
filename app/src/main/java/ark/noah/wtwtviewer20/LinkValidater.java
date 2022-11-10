@@ -55,7 +55,7 @@ public class LinkValidater {
 
     private int extractToonId(URL aURL)  {
         String queries = aURL.getQuery();
-        Log.i("DebugLog","queries: " + queries);
+        if(isDebug) Log.i("DebugLog","queries: " + queries);
         if (queries == null) return -1;
         else if (queries.length() > 0) {
             int queryDividerIndex = queries.indexOf("&");

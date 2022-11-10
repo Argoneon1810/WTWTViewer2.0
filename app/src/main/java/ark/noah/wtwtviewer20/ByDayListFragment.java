@@ -2,6 +2,7 @@ package ark.noah.wtwtviewer20;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -21,6 +22,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CalendarView;
@@ -36,7 +38,6 @@ import ark.noah.wtwtviewer20.databinding.FragmentByDayListBinding;
 public class ByDayListFragment extends Fragment implements AddNewDialog.DialogInterface {
     public static final int INDEX = 1;
 
-    private ByDayListViewModel mViewModel;
     private FragmentByDayListBinding binding;
 
     private DBHelper dbHelper;
@@ -56,12 +57,16 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState
     ) {
-        mViewModel = new ViewModelProvider(this).get(ByDayListViewModel.class);
         binding = FragmentByDayListBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
@@ -95,36 +100,40 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         }
 
         ByDayListFragment fragment = this;
-        binding.bydayRec.addOnItemTouchListener(new RecyclerTouchListener(requireContext().getApplicationContext(), binding.bydayRec, new AllListFragment.ClickListener() {
+        binding.bydayRec.addOnItemTouchListener(new RecyclerTouchListener(requireContext().getApplicationContext(), binding.bydayRec, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(getString(R.string.bundle_toons), ((ToonsAdapter) Objects.requireNonNull(binding.bydayRec.getAdapter())).getmData().get(position));
-                Navigation.findNavController(fragment.requireView()).navigate(R.id.action_allListFragment_to_episodesListFragment, bundle);
+                Navigation.findNavController(fragment.requireView()).navigate(R.id.action_byDayListFragment_to_episodesListFragment, bundle);
             }
 
             @Override
             public void onLongClick(View view, int position) {
-                PopupMenu popupMenu = new PopupMenu(requireContext(), view, Gravity.END);
+                Context context;
+                try {
+                    context = requireContext();
+                } catch(IllegalStateException e) {
+                    e.printStackTrace();
+                    return;
+                }
 
+                PopupMenu popupMenu = new PopupMenu(context, view, Gravity.END);
                 popupMenu.getMenuInflater().inflate(R.menu.main_popup, popupMenu.getMenu());
+
+                ToonsAdapter adapter = (ToonsAdapter) Objects.requireNonNull(binding.bydayRec.getAdapter());
 
                 Menu menu = popupMenu.getMenu();
                 for (int i = 0; i < menu.size(); ++i) {
-                    if(menu.getItem(i).getItemId() == R.id.action_showhidepopup) {
-                        if(((ToonsAdapter) Objects.requireNonNull(binding.bydayRec.getAdapter())).getmData().get(position).hide)
+                    MenuItem menuItem = menu.getItem(i);
+                    if(menuItem.getItemId() == R.id.action_showhidepopup)
+                        if (adapter.getmData().get(position).hide)
                             menu.getItem(i).setTitle(R.string.action_set_show);
-                        else
-                            menu.getItem(i).setTitle(R.string.action_set_hide);
-                        break;
-                    }
-                    else if(menu.getItem(i).getItemId() == R.id.action_completepopup) {
-                        if(((ToonsAdapter) Objects.requireNonNull(binding.bydayRec.getAdapter())).getmData().get(position).completed)
+                        else menu.getItem(i).setTitle(R.string.action_set_hide);
+                    if(menuItem.getItemId() == R.id.action_completepopup)
+                        if (adapter.getmData().get(position).completed)
                             menu.getItem(i).setTitle(R.string.action_set_incomplete);
-                        else
-                            menu.getItem(i).setTitle(R.string.action_set_complete);
-                        break;
-                    }
+                        else menu.getItem(i).setTitle(R.string.action_set_complete);
                 }
 
                 popupMenu.setOnMenuItemClickListener(menuItem -> {
@@ -150,7 +159,8 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
                     } else if (menuItem.getTitle().equals(requireContext().getText(R.string.menu_edit))) {
                         Bundle bundle = new Bundle();
                         bundle.putParcelable(getString(R.string.bundle_toons), currentItem);
-                        Navigation.findNavController(fragment.requireView()).navigate(R.id.action_allListFragment_to_editEntryFragment, bundle);
+                        bundle.putInt(getString(R.string.bundle_from), INDEX);
+                        Navigation.findNavController(fragment.requireView()).navigate(R.id.action_byDayListFragment_to_editEntryFragment, bundle);
                     }
                     return false;
                 });
@@ -192,13 +202,10 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         binding.bydayRec.setAdapter(new ToonsAdapter(dbHelper.getAllToonsFiltered(
                 dayToShow,
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false),
-                sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false)
+                sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false),
+                false,
+                false
         )));
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     private void onCheckedChangedShowHidden(CompoundButton cb, boolean b) {
@@ -219,6 +226,23 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         editor.apply();
 
         loadRecyclerItemFiltered();
+    }
+
+    @Override
+    public void onProceedButtonClicked(View v, String validatedUrl) {
+        NavController navController = Navigation.findNavController(this.requireView());
+        Bundle bundle = new Bundle();
+        bundle.putInt(getString(R.string.bundle_from), INDEX);
+        bundle.putString(getString(R.string.bundle_link), validatedUrl);
+        navController.navigate(R.id.action_byDayListFragment_to_reviewEntryFragment, bundle);
+    }
+
+    @Override
+    public void onWebButtonClicked(View v) {
+        NavController navController = Navigation.findNavController(this.requireView());
+        Bundle bundle = new Bundle();
+        bundle.putInt(getString(R.string.bundle_from), INDEX);
+        navController.navigate(R.id.action_byDayListFragment_to_addByWebFragment, bundle);
     }
 
     private void assignButtonListeners()
@@ -313,22 +337,5 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         binding.btnFri.setForeground(binding.btnFri.equals(lastInteractedView) ? foreground : null);
         binding.btnSat.setForeground(binding.btnSat.equals(lastInteractedView) ? foreground : null);
         binding.btnUnspecified.setForeground(binding.btnUnspecified.equals(lastInteractedView) ? foreground : null);
-    }
-
-    @Override
-    public void onProceedButtonClicked(View v, String validatedUrl) {
-        NavController navController = Navigation.findNavController(this.requireView());
-        Bundle bundle = new Bundle();
-        bundle.putInt(getString(R.string.bundle_from), INDEX);
-        bundle.putString(getString(R.string.bundle_link), validatedUrl);
-        navController.navigate(R.id.action_byDayListFragment_to_reviewEntryFragment, bundle);
-    }
-
-    @Override
-    public void onWebButtonClicked(View v) {
-        NavController navController = Navigation.findNavController(this.requireView());
-        Bundle bundle = new Bundle();
-        bundle.putInt(getString(R.string.bundle_from), INDEX);
-        navController.navigate(R.id.action_byDayListFragment_to_addByWebFragment, bundle);
     }
 }

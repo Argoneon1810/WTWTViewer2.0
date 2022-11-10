@@ -38,31 +38,43 @@
     <string name="pref_key_btn_backup" translatable="false">btn_backup</string>
     <string name="pref_key_btn_restore" translatable="false">btn_restore</string>
     <string name="pref_key_btn_clear_all" translatable="false">btn_clear_all</string>
+
     <string name="shared_pref_key" translatable="false">sharedprefwtwt</string>
     <string name="shared_pref_showhidden_key" translatable="false">showhidden</string>
     <string name="shared_pref_showcompleted_key" translatable="false">showcompleted</string>
+
     <string name="bundle_from" translatable="false">from</string>
     <string name="bundle_junk" translatable="false">junkargumentforupdate</string>
     <string name="bundle_link" translatable="false">validatedLink</string>
     <string name="bundle_toons" translatable="false">toonsparcelable</string>
+    <string name="bundle_toons_old" translatable="false">toonsparcelableold</string>
 
-    <string name="txt_plswait">Please wait for a moment.</string>
     <string name="dialog_from_web">From Web?</string>
     <string name="dialog_txt_url">url</string>
+
     <string name="dialog_desc_addnew">Create New Item</string>
     <string name="btn_web_addthispage">Add This Page</string>
+
     <string name="hint_toonid">Toon ID</string>
     <string name="hint_epiid">Episode ID</string>
     <string name="hint_toontype">Toon Type</string>
 
     <string name="menu_edit">Edit</string>
     <string name="menu_delete">Delete</string>
+
     <string name="action_set_hide">Set Hidden</string>
     <string name="action_set_show">Set Visible</string>
+    <string name="action_set_complete">Set as Complete</string>
+    <string name="action_set_incomplete">Set as Incomplete</string>
+
     <string name="frag_title_edit_entry">Edit Entry</string>
     <string name="frag_title_review_entry">Review New Entry</string>
     <string name="frag_title_episode_list">Episodes List</string>
     <string name="frag_title_viewer">Viewer</string>
-    <string name="action_set_complete">Set as Complete</string>
-    <string name="action_set_incomplete">Set as Incomplete</string>
+
+    <string name="txt_plswait">Please wait for a moment.</string>
+    <string name="txt_invalid_title">Title shouldn\'t be empty!</string>
+    <string name="txt_something_went_wrong">Something went wrong</string>
+    <string name="txt_invalid_episode_id">There is no such episode</string>
+    <string name="txt_unsupported_toon">Manga unsupported</string>
 </resources>

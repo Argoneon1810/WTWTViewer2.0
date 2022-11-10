@@ -1,5 +1,6 @@
 package ark.noah.wtwtviewer20;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,9 +10,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,10 +28,11 @@ import java.util.Iterator;
 
 import ark.noah.wtwtviewer20.databinding.FragmentReviewEntryBinding;
 
-public class ReviewEntryFragment extends Fragment implements ExecutorRunner.Callback {
+public class ReviewEntryFragment extends Fragment implements ExecutorRunner.Callback<Document> {
 
     private FragmentReviewEntryBinding binding;
-    private ReviewEntryViewModel mViewModel;
+
+    boolean isDebug = true;
 
     private int cameFrom;
     private String receivedURL;
@@ -36,6 +40,7 @@ public class ReviewEntryFragment extends Fragment implements ExecutorRunner.Call
     private String title;
     private String thumbnailURL;
     private int releaseDay;
+    private int episodeID;
 
     private DBHelper dbHelper;
 
@@ -48,9 +53,10 @@ public class ReviewEntryFragment extends Fragment implements ExecutorRunner.Call
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mViewModel = new ViewModelProvider(this).get(ReviewEntryViewModel.class);
         binding = FragmentReviewEntryBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
+
+        isDebug = MainActivity.Instance.isDebug;
 
         dbHelper = new DBHelper(requireContext().getApplicationContext());
 
@@ -64,80 +70,77 @@ public class ReviewEntryFragment extends Fragment implements ExecutorRunner.Call
         ReviewEntryAdapter adapter = new ReviewEntryAdapter(mList);
         binding.recReview.setAdapter(adapter);
 
-        if(linkValidater.isLinkValidAll(receivedURL)) {
-            new ExecutorRunner().execute(() -> {
-                Document document = null;
-                try {
-                    document = Jsoup.connect(receivedURL).get();
-
-                    String header = document.select("div.whead").select("h1").text();
-                    header = header.substring(header.indexOf(") ") + 1);
-                    title = header.substring(0, header.lastIndexOf(' '));
-                    releaseDay = 0;
-                    thumbnailURL = "";
-                } catch (IOException e) {
-                    e.printStackTrace();
+        new ExecutorRunner().execute(() -> {
+            Document document = null;
+            String urlToUseInString = receivedURL;
+            try {
+                if(linkValidater.isLinkValidAll(receivedURL)) {
+                    LinkValidater.Info info = linkValidater.extractInfo(receivedURL);
+                    urlToUseInString = LinkGetter.Instance.getEntryPoint() + info.toonType + 1 + "?toon=" + info.toonID;
                 }
-                return document;
-            }, this);
-        }
-        else {
-            new ExecutorRunner().execute(() -> {
-                Document document = null;
-                try {
-                    document = Jsoup.connect(receivedURL).get();
+                document = Jsoup.connect(urlToUseInString).get();
 
-                    Iterator<Element> headers = document.select("div.whead").select("h1").iterator();
-                    while(headers.hasNext()) {
-                        String header = headers.next().text();
-                        if(!header.equals("인기웹툰")) title = header;
-                    }
-
-                    Calendar calendar = Calendar.getInstance();
-                    int[] occurance = { 0, 0, 0, 0, 0, 0, 0 };
-                    Iterator<Element> dates = document.select("div.date").iterator();
-                    while(dates.hasNext()) {
-                        String formattedDate = dates.next().text();
-                        int firstDash = formattedDate.indexOf('-');
-                        int year = Integer.parseInt(formattedDate.substring(0, firstDash));
-                        String monthAnDayOfMonth = formattedDate.substring(firstDash+1);
-                        int secondDash = monthAnDayOfMonth.indexOf('-');
-                        int month = Integer.parseInt(monthAnDayOfMonth.substring(0, secondDash));
-                        int dayOfMonth = Integer.parseInt(monthAnDayOfMonth.substring(secondDash + 1));
-                        calendar.set(year, month, dayOfMonth);
-                        ++occurance[calendar.get(Calendar.DAY_OF_WEEK)-1];
-                    }
-                    int max = -1;
-                    int maxIndex = -1;
-                    for (int i = 0; i < occurance.length; ++i) {
-                        max = Math.max(max, occurance[i]);
-                        maxIndex = i;
-                    }
-                    releaseDay = 1 << (maxIndex-1);
-
-                    thumbnailURL = document.select("div.img-box").select("img").attr("src");
-                } catch (IOException e) {
-                    e.printStackTrace();
+                for (Element element : document.select("div.whead").select("h1")) {
+                    String header = element.text();
+                    if (!header.equals("인기웹툰") && !header.equals("인기만화")) title = header;
                 }
-                return document;
-            }, this);
-        }
+
+                Calendar calendar = Calendar.getInstance();
+                int[] occurance = { 0, 0, 0, 0, 0, 0, 0 };
+                for (Element element : document.select("div.date")) {
+                    String formattedDate = element.text();
+                    int firstDash = formattedDate.indexOf('-');
+                    int year = Integer.parseInt(formattedDate.substring(0, firstDash));
+                    String monthAnDayOfMonth = formattedDate.substring(firstDash + 1);
+                    int secondDash = monthAnDayOfMonth.indexOf('-');
+                    int month = Integer.parseInt(monthAnDayOfMonth.substring(0, secondDash));
+                    int dayOfMonth = Integer.parseInt(monthAnDayOfMonth.substring(secondDash + 1));
+                    calendar.set(year, month, dayOfMonth);
+                    ++occurance[calendar.get(Calendar.DAY_OF_WEEK) - 1];
+                }
+                int max = -1;
+                int maxIndex = -1;
+                for (int i = 0; i < occurance.length; ++i) {
+                    max = Math.max(max, occurance[i]);
+                    maxIndex = i;
+                }
+                releaseDay = 1 << (maxIndex-1);
+
+                thumbnailURL = document.select("div.img-box").select("img").attr("src");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return document;
+        }, this);
 
         ReviewEntryFragment fragment = this;
         binding.fabReviewProceed.setOnClickListener((v) -> {
-            dbHelper.insertToonContent(adapter.mList.get(0));       //always 1 entry
+            Context context = v.getContext().getApplicationContext();
+            ReviewEntryAdapter.ViewHolder vh = (ReviewEntryAdapter.ViewHolder) binding.recReview.findViewHolderForAdapterPosition(0);    //always 1 entry
+            if(vh == null) {
+                Toast.makeText(context, context.getString(R.string.txt_something_went_wrong), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(vh.ToonName.getText().toString().equals("")) {
+                Toast.makeText(context, context.getString(R.string.txt_invalid_title), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            dbHelper.insertToonContent(adapter.mList.get(0));                                                                           //always 1 entry
             NavController navController = Navigation.findNavController(fragment.requireView());
             Bundle bundle = new Bundle();
             bundle.putByte(getString(R.string.bundle_junk), (byte) 0);
             switch(cameFrom) {
                 default:
                 case 0: //to alllist
+                    if(isDebug) Log.i("DebugLog", ""+cameFrom);
                     navController.navigate(R.id.action_reviewEntryFragment_to_allListFragment, bundle);
                     break;
                 case 1: //to byday
+                    if(isDebug) Log.i("DebugLog", ""+cameFrom);
                     navController.navigate(R.id.action_reviewEntryFragment_to_byDayListFragment, bundle);
                     break;
                 case 2: //to completed
+                    if(isDebug) Log.i("DebugLog", ""+cameFrom);
                     navController.navigate(R.id.action_reviewEntryFragment_to_completedListFragment2, bundle);
                     break;
             }
@@ -147,7 +150,7 @@ public class ReviewEntryFragment extends Fragment implements ExecutorRunner.Call
     }
 
     @Override
-    public void onComplete(Object result) {
+    public void onComplete(Document result) {
         ReviewEntryAdapter adapter = (ReviewEntryAdapter) binding.recReview.getAdapter();
         LinkValidater.Info info = linkValidater.extractInfo(receivedURL);
         if(adapter != null && info != null)
@@ -156,6 +159,5 @@ public class ReviewEntryFragment extends Fragment implements ExecutorRunner.Call
 
     @Override
     public void onError(Exception e) {
-
     }
 }

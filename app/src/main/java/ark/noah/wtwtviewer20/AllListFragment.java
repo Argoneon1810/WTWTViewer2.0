@@ -21,6 +21,7 @@ import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,6 @@ import ark.noah.wtwtviewer20.databinding.FragmentAllListBinding;
 public class AllListFragment extends Fragment implements AddNewDialog.DialogInterface {
     public static final int INDEX = 0;
 
-    private AllListViewModel mViewModel;
     private FragmentAllListBinding binding;
 
     private DBHelper dbHelper;
@@ -48,19 +48,22 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState
     ) {
-        mViewModel = new ViewModelProvider(this).get(AllListViewModel.class);
+        isDebug = MainActivity.Instance.isDebug;
+
         binding = FragmentAllListBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
-        isDebug = MainActivity.Instance.isDebug;
-
         dbHelper = new DBHelper(requireContext().getApplicationContext());
-
         sharedPreferences = requireActivity().getApplicationContext().getSharedPreferences(getString(R.string.shared_pref_key), MODE_PRIVATE);
 
         binding.sAlllistShowhidden.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false));
@@ -69,7 +72,6 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         loadRecyclerItemFiltered();
 
         addNewDialogFragment = new AddNewDialog(this);
-
         binding.fabAlllist.setOnClickListener(v -> addNewDialogFragment.show(getParentFragmentManager(), AddNewDialog.TAG));
 
         Bundle receivedBundle = getArguments();
@@ -85,37 +87,40 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
             @Override
             public void onClick(View view, int position) {
                 Bundle bundle = new Bundle();
-                ToonsContainer toonsContainer = ((ToonsAdapter) Objects.requireNonNull(binding.alllistRec.getAdapter())).getmData().get(position);
-                bundle.putParcelable(getString(R.string.bundle_toons), toonsContainer);
+                bundle.putParcelable(getString(R.string.bundle_toons), ((ToonsAdapter) Objects.requireNonNull(binding.alllistRec.getAdapter())).getmData().get(position));
                 Navigation.findNavController(fragment.requireView()).navigate(R.id.action_allListFragment_to_episodesListFragment, bundle);
             }
 
             @Override
             public void onLongClick(View view, int position) {
-                PopupMenu popupMenu = new PopupMenu(requireContext(), view, Gravity.END);
+                Context context;
+                try {
+                     context = requireContext();
+                } catch(IllegalStateException e) {
+                    e.printStackTrace();
+                    return;
+                }
 
+                PopupMenu popupMenu = new PopupMenu(context, view, Gravity.END);
                 popupMenu.getMenuInflater().inflate(R.menu.main_popup, popupMenu.getMenu());
+
+                ToonsAdapter adapter = (ToonsAdapter) Objects.requireNonNull(binding.alllistRec.getAdapter());
 
                 Menu menu = popupMenu.getMenu();
                 for (int i = 0; i < menu.size(); ++i) {
-                    if(menu.getItem(i).getItemId() == R.id.action_showhidepopup) {
-                        if(((ToonsAdapter) Objects.requireNonNull(binding.alllistRec.getAdapter())).getmData().get(position).hide)
+                    MenuItem menuItem = menu.getItem(i);
+                    if(menuItem.getItemId() == R.id.action_showhidepopup)
+                        if (adapter.getmData().get(position).hide)
                             menu.getItem(i).setTitle(R.string.action_set_show);
-                        else
-                            menu.getItem(i).setTitle(R.string.action_set_hide);
-                        break;
-                    }
-                    else if(menu.getItem(i).getItemId() == R.id.action_completepopup) {
-                        if(((ToonsAdapter) Objects.requireNonNull(binding.alllistRec.getAdapter())).getmData().get(position).completed)
+                        else menu.getItem(i).setTitle(R.string.action_set_hide);
+                    if(menuItem.getItemId() == R.id.action_completepopup)
+                        if (adapter.getmData().get(position).completed)
                             menu.getItem(i).setTitle(R.string.action_set_incomplete);
-                        else
-                            menu.getItem(i).setTitle(R.string.action_set_complete);
-                        break;
-                    }
+                        else menu.getItem(i).setTitle(R.string.action_set_complete);
                 }
 
                 popupMenu.setOnMenuItemClickListener(menuItem -> {
-                    ToonsContainer currentItem = ((ToonsAdapter) Objects.requireNonNull(binding.alllistRec.getAdapter())).getmData().get(position);
+                    ToonsContainer currentItem = adapter.getmData().get(position);
                     if (menuItem.getTitle().equals(requireContext().getText(R.string.action_set_hide))) {
                         currentItem.hide = true;
                         dbHelper.editToonContent(currentItem);
@@ -137,6 +142,7 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
                     } else if (menuItem.getTitle().equals(requireContext().getText(R.string.menu_edit))) {
                         Bundle bundle = new Bundle();
                         bundle.putParcelable(getString(R.string.bundle_toons), currentItem);
+                        bundle.putInt(getString(R.string.bundle_from), INDEX);
                         Navigation.findNavController(fragment.requireView()).navigate(R.id.action_allListFragment_to_editEntryFragment, bundle);
                     }
                     return false;
@@ -177,7 +183,9 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         binding.alllistRec.setAdapter(new ToonsAdapter(dbHelper.getAllToonsFiltered(
                 ToonsContainer.ReleaseDay.ALL,
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false),
-                sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false)
+                sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false),
+                false,
+                false
         )));
     }
 
@@ -216,10 +224,5 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         Bundle bundle = new Bundle();
         bundle.putInt(getString(R.string.bundle_from), INDEX);
         navController.navigate(R.id.action_allListFragment_to_addByWebFragment, bundle);
-    }
-
-    public interface ClickListener {
-        void onClick(View view, int position);
-        void onLongClick(View view, int position);
     }
 }

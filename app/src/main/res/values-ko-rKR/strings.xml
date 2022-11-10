@@ -44,4 +44,8 @@
     <string name="frag_title_viewer">뷰어</string>
     <string name="action_set_complete">완결작 등록</string>
     <string name="action_set_incomplete">완결작 등록 해제</string>
+    <string name="txt_invalid_title">제목은 공백일 수 없습니다!</string>
+    <string name="txt_something_went_wrong">예상치 못한 문제가 발생했습니다</string>
+    <string name="txt_invalid_episode_id">유효하지 않은 회차 번호입니다</string>
+    <string name="txt_unsupported_toon">만화책은 지원하지 않습니다</string>
 </resources>

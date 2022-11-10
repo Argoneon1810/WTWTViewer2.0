@@ -1,5 +1,6 @@
 package ark.noah.wtwtviewer20;
 
+import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -30,7 +31,6 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
     private boolean isDebug = true;
 
     private FragmentAddByWebBinding binding;
-    private AddByWebViewModel mViewModel;
 
     private String entryPoint;
     private String currentlyVisibleUrlInString;
@@ -43,11 +43,11 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
         return new AddByWebFragment();
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentAddByWebBinding.inflate(inflater, container, false);
-        mViewModel = new ViewModelProvider(this).get(AddByWebViewModel.class);
         View view = binding.getRoot();
 
         linkValidater = LinkValidater.Instance != null ? LinkValidater.Instance : new LinkValidater();

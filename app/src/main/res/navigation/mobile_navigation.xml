@@ -122,6 +122,9 @@
         <argument
             android:name="from"
             app:argType="integer" />
+        <argument
+            android:name="link"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/episodesListFragment"
@@ -141,8 +144,18 @@
         android:label="@string/frag_title_viewer"
         tools:layout="@layout/fragment_toon_viewer" >
         <argument
-            android:name="url"
-            app:argType="string" />
+            android:name="Toon"
+            app:argType="ark.noah.wtwtviewer20.ToonsContainer" />
+        <action
+            android:id="@+id/action_toonViewerFragment_self"
+            app:destination="@id/toonViewerFragment"
+            app:popUpTo="@id/toonViewerFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_toonViewerFragment_to_episodesListFragment"
+            app:destination="@id/episodesListFragment"
+            app:popUpTo="@id/episodesListFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/editEntryFragment"
@@ -152,5 +165,20 @@
         <argument
             android:name="Toon"
             app:argType="ark.noah.wtwtviewer20.ToonsContainer" />
+        <action
+            android:id="@+id/action_editEntryFragment_to_completedListFragment"
+            app:destination="@id/completedListFragment"
+            app:popUpTo="@id/completedListFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_editEntryFragment_to_byDayListFragment"
+            app:destination="@id/byDayListFragment"
+            app:popUpTo="@id/byDayListFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_editEntryFragment_to_allListFragment"
+            app:destination="@id/allListFragment"
+            app:popUpTo="@id/allListFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

@@ -1,19 +1,27 @@
 package ark.noah.wtwtviewer20;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -24,10 +32,13 @@ public class ReviewEntryAdapter extends RecyclerView.Adapter<ReviewEntryAdapter.
 
     private Drawable foreground;
 
+    Drawable ic_loading, ic_error, ic_empty;
+
     public ReviewEntryAdapter(ArrayList<ToonsContainer> mList) {
         this.mList = mList;
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -40,6 +51,18 @@ public class ReviewEntryAdapter extends RecyclerView.Adapter<ReviewEntryAdapter.
         context.getTheme().resolveAttribute(R.attr.ButtonFocusedForegroundTransparent, value, true);
         foreground = new ColorDrawable(value.data);
 
+        ic_loading = context.getDrawable(R.drawable.ic_baseline_downloading_24);
+        ic_empty   = context.getDrawable(R.drawable.ic_baseline_device_unknown_24);
+        ic_error   = context.getDrawable(R.drawable.ic_baseline_error_outline_24);
+
+        TypedValue value2 = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.textColorSecondary, value2, true);
+        BlendModeColorFilter greyColorFilter = new BlendModeColorFilter(value2.data, BlendMode.SRC_ATOP);
+
+        ic_loading.setColorFilter(greyColorFilter);
+        ic_empty.setColorFilter(greyColorFilter);
+        ic_error.setColorFilter(greyColorFilter);
+
         return new ReviewEntryAdapter.ViewHolder(view);
     }
 
@@ -47,11 +70,12 @@ public class ReviewEntryAdapter extends RecyclerView.Adapter<ReviewEntryAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.item = mList.get(position);
 
-        Log.i("DebugLog", "position:\t" + position);
-        Log.i("DebugLog", "toon name:\t" + holder.item.toonName);
-        Log.i("DebugLog", "toon id:\t" + holder.item.toonID);
-        Log.i("DebugLog", "episode id:\t" + holder.item.episodeID);
-        Log.i("DebugLog", "release day:\t" + holder.item.releaseWeekdays);
+        Glide.with(holder.Thumbnail)
+                .load(holder.item.thumbnailURL)
+                .placeholder(ic_loading)
+                .error(ic_error)
+                .fallback(ic_empty)
+                .into(holder.Thumbnail);
 
         holder.ToonName.setText(holder.item.toonName);
         holder.ToonID.setText(String.valueOf(holder.item.toonID));
@@ -90,6 +114,7 @@ public class ReviewEntryAdapter extends RecyclerView.Adapter<ReviewEntryAdapter.
     public class ViewHolder extends RecyclerView.ViewHolder {
         ToonsContainer item;
 
+        ImageView Thumbnail;
         EditText ToonName;
         TextView ToonID;
         TextView EpisodeID;
@@ -99,6 +124,7 @@ public class ReviewEntryAdapter extends RecyclerView.Adapter<ReviewEntryAdapter.
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            Thumbnail = itemView.findViewById(R.id.img_rec_review_thumbnail);
             ToonName = itemView.findViewById(R.id.etxt_rec_review_title);
             ToonID = itemView.findViewById(R.id.tv_rec_review_toonid);
             EpisodeID = itemView.findViewById(R.id.tv_rec_review_epiid);
@@ -112,13 +138,31 @@ public class ReviewEntryAdapter extends RecyclerView.Adapter<ReviewEntryAdapter.
             Fri = itemView.findViewById(R.id.btn_rec_review_fri);
             Sat = itemView.findViewById(R.id.btn_rec_review_sat);
 
-            Sun.setOnClickListener((v) -> Sun.setForeground(item.tryChangeFlagWeekday((1 << ToonsContainer.ReleaseDay.SUN.getValue())) ? foreground : null));
-            Mon.setOnClickListener((v) -> Mon.setForeground(item.tryChangeFlagWeekday((1 << ToonsContainer.ReleaseDay.MON.getValue())) ? foreground : null));
-            Tue.setOnClickListener((v) -> Tue.setForeground(item.tryChangeFlagWeekday((1 << ToonsContainer.ReleaseDay.TUE.getValue())) ? foreground : null));
-            Wed.setOnClickListener((v) -> Wed.setForeground(item.tryChangeFlagWeekday((1 << ToonsContainer.ReleaseDay.WED.getValue())) ? foreground : null));
-            Thu.setOnClickListener((v) -> Thu.setForeground(item.tryChangeFlagWeekday((1 << ToonsContainer.ReleaseDay.THU.getValue())) ? foreground : null));
-            Fri.setOnClickListener((v) -> Fri.setForeground(item.tryChangeFlagWeekday((1 << ToonsContainer.ReleaseDay.FRI.getValue())) ? foreground : null));
-            Sat.setOnClickListener((v) -> Sat.setForeground(item.tryChangeFlagWeekday((1 << ToonsContainer.ReleaseDay.SAT.getValue())) ? foreground : null));
+            ToonName.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    Context context = itemView.getContext().getApplicationContext();
+                    String testTitle = editable.toString();
+                    if(testTitle.equals("")) Toast.makeText(context, context.getString(R.string.txt_invalid_title), Toast.LENGTH_SHORT).show();
+                    else item.toonName = testTitle;
+                }
+            });
+
+            Sun.setOnClickListener((v) -> highlightButton(v, ToonsContainer.ReleaseDay.SUN));
+            Mon.setOnClickListener((v) -> highlightButton(v, ToonsContainer.ReleaseDay.MON));
+            Tue.setOnClickListener((v) -> highlightButton(v, ToonsContainer.ReleaseDay.TUE));
+            Wed.setOnClickListener((v) -> highlightButton(v, ToonsContainer.ReleaseDay.WED));
+            Thu.setOnClickListener((v) -> highlightButton(v, ToonsContainer.ReleaseDay.THU));
+            Fri.setOnClickListener((v) -> highlightButton(v, ToonsContainer.ReleaseDay.FRI));
+            Sat.setOnClickListener((v) -> highlightButton(v, ToonsContainer.ReleaseDay.SAT));
+        }
+
+        private void highlightButton(View view, ToonsContainer.ReleaseDay releaseDay) {
+            view.setForeground(item.tryChangeFlagWeekday((1 << releaseDay.getValue())) ? foreground : null);
         }
     }
 }
