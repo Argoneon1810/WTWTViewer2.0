@@ -27,6 +27,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 import ark.noah.wtwtviewer20.databinding.FragmentAllListBinding;
@@ -180,13 +183,15 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
     }
 
     private void loadRecyclerItemFiltered() {
-        binding.alllistRec.setAdapter(new ToonsAdapter(dbHelper.getAllToonsFiltered(
+        ArrayList<ToonsContainer> containers = dbHelper.getAllToonsFiltered(
                 ToonsContainer.ReleaseDay.ALL,
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false),
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false),
                 false,
                 false
-        )));
+        );
+        containers.sort(Comparator.comparing(tc -> tc.toonName));
+        binding.alllistRec.setAdapter(new ToonsAdapter(containers));
     }
 
     private void onCheckedChangedShowHidden(CompoundButton cb, boolean b) {

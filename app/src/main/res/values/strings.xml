@@ -49,6 +49,8 @@
     <string name="bundle_toons" translatable="false">toonsparcelable</string>
     <string name="bundle_toons_old" translatable="false">toonsparcelableold</string>
 
+    <string name="date_format" translatable="false">yyyy-MM-dd</string>
+
     <string name="dialog_from_web">From Web?</string>
     <string name="dialog_txt_url">url</string>
 
@@ -77,4 +79,10 @@
     <string name="txt_something_went_wrong">Something went wrong</string>
     <string name="txt_invalid_episode_id">There is no such episode</string>
     <string name="txt_unsupported_toon">Manga unsupported</string>
+    <string name="txt_backup_in_progress">Backing up in background</string>
+    <string name="txt_restore_in_progress">Restoring in background</string>
+    <string name="txt_backup_successful">Backed up successfully</string>
+    <string name="txt_restore_successfully">Restored successfully</string>
+    <string name="txt_restore_failed">Restore failed</string>
+    <string name="txt_backup_failed">Back up failed</string>
 </resources>

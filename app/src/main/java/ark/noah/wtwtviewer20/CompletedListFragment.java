@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 import ark.noah.wtwtviewer20.databinding.FragmentByDayListBinding;
@@ -170,13 +171,15 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
     }
 
     private void loadRecyclerItemFiltered() {
-        binding.completedRec.setAdapter(new ToonsAdapter(dbHelper.getAllToonsFiltered(
+        ArrayList<ToonsContainer> containers = dbHelper.getAllToonsFiltered(
                 ToonsContainer.ReleaseDay.ALL,
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false),
                 true,
                 false,
                 true
-        )));
+        );
+        containers.sort(Comparator.comparing(tc -> tc.toonName));
+        binding.completedRec.setAdapter(new ToonsAdapter(containers));
     }
 
     private void onCheckedChangedShowHidden(CompoundButton cb, boolean b) {

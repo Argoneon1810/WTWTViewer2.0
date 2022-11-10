@@ -60,7 +60,7 @@ public class EpisodesAdapter extends RecyclerView.Adapter<EpisodesAdapter.ViewHo
 
         holder.Number.setText(String.valueOf(mContainer.number));
         holder.Title.setText(mContainer.title);
-        holder.Date.setText(mContainer.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        holder.Date.setText(mContainer.date.format(DateTimeFormatter.ofPattern(holder.itemView.getContext().getString(R.string.date_format))));
 
         String urlInString = LinkGetter.Instance.getEntryPoint() + mContainer.link;
         LinkValidater.Info info = linkValidater.extractInfo(urlInString);

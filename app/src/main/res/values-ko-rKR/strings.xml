@@ -48,4 +48,10 @@
     <string name="txt_something_went_wrong">예상치 못한 문제가 발생했습니다</string>
     <string name="txt_invalid_episode_id">유효하지 않은 회차 번호입니다</string>
     <string name="txt_unsupported_toon">만화책은 지원하지 않습니다</string>
+    <string name="txt_backup_in_progress">백그라운드에서 백업을 진행중입니다</string>
+    <string name="txt_restore_in_progress">백그라운드에서 복원을 진행중입니다</string>
+    <string name="txt_backup_successful">성공적으로 백업했습니다</string>
+    <string name="txt_restore_successfully">성공적으로 복원했습니다</string>
+    <string name="txt_restore_failed">복원에 실패했습니다</string>
+    <string name="txt_backup_failed">백업에 실패했습니다</string>
 </resources>

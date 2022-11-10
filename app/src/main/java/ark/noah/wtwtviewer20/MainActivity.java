@@ -19,7 +19,7 @@ import java.util.Objects;
 import ark.noah.wtwtviewer20.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements LinkGetter.Callback {
-    public boolean isDebug = true;
+    public boolean isDebug = false;
 
     public static MainActivity Instance;
     public LinkGetter linkGetter;

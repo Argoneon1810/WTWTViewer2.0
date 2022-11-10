@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -72,6 +73,7 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
         }
 
         ArrayList<EpisodesContainer> mData = dbHelper.getAllEpisodes(currentContainer);
+        mData.sort(Comparator.comparing((ec) -> ec.number));
         EpisodesAdapter adapter = new EpisodesAdapter(mData, currentContainer, this::onClick, this);
         binding.recEpisodes.setAdapter(adapter);
         RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(requireContext()) {
@@ -127,23 +129,28 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
 
     @Override
     public void onComplete(Document result) {
-        ArrayList<EpisodesContainer> containers = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        for (int i = 0; i < titles.size(); ++i) {
-            EpisodesContainer container = new EpisodesContainer();
-            container.link = links.get(i);
-            container.number = Integer.parseInt(numbers.get(i));
-            container.title = titles.get(i);
-            container.date = LocalDate.parse(dates.get(i), formatter);
-            if(dbHelper.tryInsertEpisodeContent(currentContainer, container))
-                containers.add(container);
-            else break;
-        }
+        try {
+            ArrayList<EpisodesContainer> containers = new ArrayList<>();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getString(R.string.date_format));
+            for (int i = 0; i < titles.size(); ++i) {
+                EpisodesContainer container = new EpisodesContainer();
+                container.number = Integer.parseInt(numbers.get(i));
+                container.dbIDofToon = currentContainer.dbID;
+                container.link = links.get(i);
+                container.title = titles.get(i);
+                container.date = LocalDate.parse(dates.get(i), formatter);
+                if (dbHelper.tryInsertEpisodeContent(currentContainer, container))
+                    containers.add(container);
+                else break;
+            }
 
-        if(containers.size() > 0) {
-            EpisodesAdapter adapter = (EpisodesAdapter) binding.recEpisodes.getAdapter();
-            Objects.requireNonNull(adapter).addAtFront(containers);
-            binding.recEpisodes.scrollToPosition(adapter.getPositionOfEpisode(containers.get(0).number));
+            if (containers.size() > 0) {
+                EpisodesAdapter adapter = (EpisodesAdapter) binding.recEpisodes.getAdapter();
+                Objects.requireNonNull(adapter).addAtFront(containers);
+                binding.recEpisodes.scrollToPosition(adapter.getPositionOfEpisode(containers.get(0).number));
+            }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
     }
 

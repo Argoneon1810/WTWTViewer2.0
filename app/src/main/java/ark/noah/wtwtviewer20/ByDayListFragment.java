@@ -30,7 +30,10 @@ import android.widget.CompoundButton;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Objects;
 
 import ark.noah.wtwtviewer20.databinding.FragmentByDayListBinding;
@@ -199,13 +202,15 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
     private void loadRecyclerItemFiltered() {
         if(isDebug) Log.i("DebugLog", "day to show: " + dayToShow);
         if(isDebug) Log.i("DebugLog", "day to show (int): " + dayToShow.getValue());
-        binding.bydayRec.setAdapter(new ToonsAdapter(dbHelper.getAllToonsFiltered(
+        ArrayList<ToonsContainer> containers = dbHelper.getAllToonsFiltered(
                 dayToShow,
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false),
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false),
                 false,
                 false
-        )));
+        );
+        containers.sort(Comparator.comparing(tc -> tc.toonName));
+        binding.bydayRec.setAdapter(new ToonsAdapter(containers));
     }
 
     private void onCheckedChangedShowHidden(CompoundButton cb, boolean b) {

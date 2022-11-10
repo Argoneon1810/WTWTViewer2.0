@@ -59,8 +59,12 @@ public class DBHelper extends SQLiteOpenHelper {
             + " REFERENCES " + TABLE_NAME_TOONS + "(" + ID + "), "
             + " PRIMARY KEY (" + COL_NUM + ", " + ID + "))";
 
+    String dateformat;
+
     public DBHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        if(context!=null)
+            dateformat = context.getString(R.string.date_format);
     }
 
     @Override
@@ -192,6 +196,40 @@ public class DBHelper extends SQLiteOpenHelper {
         return toReturn;
     }
 
+    @SuppressLint("Range")
+    public int getLastToonID() {
+        SQLiteDatabase db = getReadableDatabase();
+        int toReturn = -1;
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME_TOONS + " ORDER BY " + ID + " DESC LIMIT 1", null);
+        if(cursor != null) {
+            if(cursor.moveToFirst()) {
+                toReturn = cursor.getInt(cursor.getColumnIndex(ID));
+            }
+            cursor.close();
+        }
+        db.close();
+        return toReturn;
+    }
+
+    public void insertEpisodeContent(EpisodesContainer episodesContainer) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.beginTransaction();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_NUM, episodesContainer.number);
+        contentValues.put(ID, episodesContainer.dbIDofToon);
+        contentValues.put(COL_TITLE, episodesContainer.title);
+        contentValues.put(COL_RELEASEDATE, episodesContainer.date.format(DateTimeFormatter.ofPattern(dateformat)));
+        contentValues.put(COL_TOONURL, episodesContainer.link);
+
+        db.insert(TABLE_NAME_EPISODES, null, contentValues);
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+
+        db.close();
+    }
     public void insertEpisodeContent(ToonsContainer toonsContainer, EpisodesContainer episodesContainer) {
         SQLiteDatabase db = getWritableDatabase();
 
@@ -201,7 +239,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(COL_NUM, episodesContainer.number);
         contentValues.put(ID, toonsContainer.dbID);
         contentValues.put(COL_TITLE, episodesContainer.title);
-        contentValues.put(COL_RELEASEDATE, episodesContainer.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        contentValues.put(COL_RELEASEDATE, episodesContainer.date.format(DateTimeFormatter.ofPattern(dateformat)));
         contentValues.put(COL_TOONURL, episodesContainer.link);
 
         db.insert(TABLE_NAME_EPISODES, null, contentValues);
@@ -237,8 +275,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 do {
                     EpisodesContainer container = new EpisodesContainer();
                     container.number = cursor.getInt(cursor.getColumnIndex(COL_NUM));
+                    container.dbIDofToon = toonsContainer.dbID;
                     container.title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
-                    container.date = LocalDate.parse(cursor.getString(cursor.getColumnIndex(COL_RELEASEDATE)), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    container.date = LocalDate.parse(cursor.getString(cursor.getColumnIndex(COL_RELEASEDATE)), DateTimeFormatter.ofPattern(dateformat));
                     container.link = cursor.getString(cursor.getColumnIndex(COL_TOONURL));
                     list.add(container);
                 } while(cursor.moveToNext());
@@ -251,5 +290,14 @@ public class DBHelper extends SQLiteOpenHelper {
         Collections.reverse(list);
 
         return list;
+    }
+
+    public void factoryReset() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_TOONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_EPISODES);
+        db.execSQL(createQueryToons);
+        db.execSQL(createQueryEpisodes);
+        db.close();
     }
 }
