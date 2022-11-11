@@ -61,8 +61,9 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
 
         linkValidater = LinkValidater.Instance != null ? LinkValidater.Instance : new LinkValidater();
 
-        Bundle receivedBundle = requireArguments();
         sharedViewModel = new ViewModelProvider(requireActivity()).get(EpisodesListToViewerSharedViewModel.class);
+
+        Bundle receivedBundle = requireArguments();
         currentContainer = receivedBundle.getParcelable(getString(R.string.bundle_toons));
         oldContainerIfExists = receivedBundle.getParcelable(getString(R.string.bundle_toons_old));
 

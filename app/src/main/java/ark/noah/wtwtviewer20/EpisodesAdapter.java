@@ -83,6 +83,12 @@ public class EpisodesAdapter extends RecyclerView.Adapter<EpisodesAdapter.ViewHo
         notifyItemRangeInserted(0, episodesContainers.size());
     }
 
+    public void add(ArrayList<EpisodesContainer> episodesContainers) {
+        int positionStart = mData.size();
+        mData.addAll(episodesContainers);
+        notifyItemRangeInserted(positionStart, episodesContainers.size());
+    }
+
     public void updateCurrentToon(ToonsContainer toonsContainer) {
         int prev = getPositionOfEpisode(currentToon.episodeID);
         int curr = getPositionOfEpisode(toonsContainer.episodeID);
@@ -101,6 +107,15 @@ public class EpisodesAdapter extends RecyclerView.Adapter<EpisodesAdapter.ViewHo
     @Override
     public int getItemCount() {
         return mData.size();
+    }
+
+    public ArrayList<EpisodesContainer> getEditableMData() {
+        return mData;
+    }
+
+    public void replaceAllData(ArrayList<EpisodesContainer> newMData) {
+        mData = newMData;
+        notifyDataSetChanged();
     }
 
     interface OnItemClickListener {

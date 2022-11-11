@@ -1,7 +1,10 @@
 package ark.noah.wtwtviewer20;
 
+import androidx.core.view.MenuProvider;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,10 +13,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -26,6 +33,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
@@ -45,6 +53,8 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
     private ArrayList<String> numbers = new ArrayList<>();
     private ArrayList<String> titles = new ArrayList<>();
     private ArrayList<String> dates = new ArrayList<>();
+
+    private boolean descending = false;
 
     public static EpisodesListFragment newInstance() {
         return new EpisodesListFragment();
@@ -73,6 +83,7 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
             binding.tvRecEpisodesWait.setVisibility(View.GONE);
             mData.sort(Comparator.comparing((ec) -> ec.number));
         }
+        if(descending) Collections.reverse(mData);
         EpisodesAdapter adapter = new EpisodesAdapter(mData, currentContainer, this::onClick, this);
         binding.recEpisodes.setAdapter(adapter);
         RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(requireContext()) {
@@ -82,7 +93,7 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
             }
         };
         smoothScroller.setTargetPosition(currentContainer.episodeID-1);
-        binding.recEpisodes.scrollToPosition(getSuitableIndex(currentContainer.episodeID-1));
+        binding.recEpisodes.scrollToPosition(getPreScrollIndex(currentContainer.episodeID-1, getCenterViewingIndex(binding.recEpisodes)));
         Objects.requireNonNull(binding.recEpisodes.getLayoutManager()).startSmoothScroll(smoothScroller);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(EpisodesListToViewerSharedViewModel.class);
@@ -117,12 +128,53 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
             return document;
         }, this);
 
+        requireActivity().addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+                menuInflater.inflate(R.menu.sort_menu_episode, menu);
+            }
+
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
+                if(menuItem.getItemId() == R.id.menu_sort) {
+                    descending = !descending;
+                    ArrayList<EpisodesContainer> containers = adapter.getEditableMData();
+                    containers.sort(Comparator.comparing((ec) -> ec.number));
+                    if(descending) Collections.reverse(containers);
+                    adapter.replaceAllData(containers);
+                    int targetPos = adapter.getPositionOfEpisode(currentContainer.episodeID);
+                    binding.recEpisodes.scrollToPosition(getPreScrollIndex(targetPos, getCenterViewingIndex(binding.recEpisodes)));
+                    binding.recEpisodes.smoothScrollToPosition(targetPos);
+                    return true;
+                }
+                return false;
+            }
+        }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+
         return view;
     }
 
-    private int getSuitableIndex(int rawIndex) {
-        int tryIndex = rawIndex - 30;
-        if(tryIndex < 0) tryIndex = 0;
+    private int getCenterViewingIndex(RecyclerView rv) {
+        LinearLayoutManager lm = (LinearLayoutManager) rv.getLayoutManager();
+        if(lm != null) {
+            int first = lm.findFirstVisibleItemPosition();
+            int last = lm.findLastVisibleItemPosition();
+            return (first + last) / 2;
+        }
+        return 0;
+    }
+
+    private int getPreScrollIndex(int rawIndex, int lastViewingIndex) {
+        int tryIndex = 0;
+        if(rawIndex > lastViewingIndex) {
+            tryIndex = rawIndex - 30;
+            return Math.max(tryIndex, lastViewingIndex);
+        }
+        else if(rawIndex < lastViewingIndex) {
+            tryIndex = rawIndex + 30;
+            return Math.min(tryIndex, lastViewingIndex);
+        }
         return tryIndex;
     }
 
@@ -144,10 +196,31 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
             }
 
             if (containers.size() > 0) {
+                containers.sort(Comparator.comparing((ec) -> ec.number));
                 binding.tvRecEpisodesWait.setVisibility(View.GONE);
                 EpisodesAdapter adapter = (EpisodesAdapter) binding.recEpisodes.getAdapter();
-                Objects.requireNonNull(adapter).addAtFront(containers);
-                binding.recEpisodes.scrollToPosition(adapter.getPositionOfEpisode(containers.get(0).number));
+                if(adapter != null) {
+                    int targetPos;
+                    if (descending) {
+                        Collections.reverse(containers);
+                        adapter.addAtFront(containers);
+                        EpisodesContainer ec = containers.get(0);
+                        if(ec.number == currentContainer.episodeID + 1)
+                            targetPos = adapter.getPositionOfEpisode(ec.number);
+                        else
+                            targetPos = adapter.getPositionOfEpisode(currentContainer.episodeID);
+                    }
+                    else {
+                        adapter.add(containers);
+                        EpisodesContainer ec = containers.get(containers.size()-1);
+                        if(ec.number == currentContainer.episodeID + 1)
+                            targetPos = adapter.getPositionOfEpisode(ec.number);
+                        else
+                            targetPos = adapter.getPositionOfEpisode(currentContainer.episodeID);
+                    }
+                    binding.recEpisodes.scrollToPosition(getPreScrollIndex(targetPos, getCenterViewingIndex(binding.recEpisodes)));
+                    binding.recEpisodes.smoothScrollToPosition(targetPos);
+                }
             }
         } catch (IllegalStateException e) {
             e.printStackTrace();
