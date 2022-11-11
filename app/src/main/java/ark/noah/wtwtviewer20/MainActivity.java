@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements LinkGetter.Callba
     public boolean isDebug = false;
 
     public static MainActivity Instance;
-    public LinkGetter linkGetter;
+    private LinkGetter linkGetter;
 
     private ActivityMainBinding binding;
     private AppBarConfiguration mAppBarConfiguration;
@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements LinkGetter.Callba
         NavigationUI.setupWithNavController(navigationView, navController);
 
         linkGetter = LinkGetter.Instance == null ? new LinkGetter(getApplicationContext(), this) : LinkGetter.Instance;
+        new DeviceSizeGetter(this);
     }
 
     @Override

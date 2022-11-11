@@ -33,6 +33,14 @@
     <string name="pref_btn_restore">Restore</string>
     <string name="pref_btn_clear">Clear All</string>
 
+    <string name="pref_cat_restore_old">Old version restore</string>
+    <string name="btn_restore_old">Restore Old DB</string>
+    <string name="pref_cat_rebuild_thumbnail">Rebuild Thumnail</string>
+    <string name="btn_rebuild_thumbnail">Reload all thumnail again</string>
+
+    <string name="pref_btn_key_restore_old" translatable="false">btn_restore_old</string>
+    <string name="pref_btn_key_rebuild_thumbnail" translatable="false">btn_rebuild_thumbnail</string>
+
     <string name="pref_key_root" translatable="false">prefwtwt</string>
     <string name="pref_key_entrypoint" translatable="false">entrypoint</string>
     <string name="pref_key_btn_backup" translatable="false">btn_backup</string>
@@ -85,18 +93,15 @@
     <string name="txt_restore_successfully">Restored successfully</string>
     <string name="txt_restore_failed">Restore failed</string>
     <string name="txt_backup_failed">Back up failed</string>
+    <string name="txt_desc_restore_old">This is for db compatibility from my old version. If you don\'t know what this is, its OK to move on.</string>
+    <string name="txt_invalid_file_type">Given file doesn\'t seem like db backup</string>
+    <string name="txt_rebuild_thumnail_complete">Thumnails are reloaded</string>
+    <string name="txt_rebuild_thumnail_started">Thumnail reload has started in bacground</string>
+
+    <string name="txt_new_entry" translatable="false">new</string>
+
     <string name="dialog_body_warning">Do you really wish to clear all db entry?</string>
     <string name="dialog_title_warning">Warning!</string>
     <string name="dialog_btn_clear_negative">Clear All</string>
     <string name="dialog_btn_cancel_positive">Back</string>
-    <string name="pref_cat_restore_old">Old version restore</string>
-    <string name="txt_desc_restore_old">This is for db compatibility from my old version. If you don\'t know what this is, its OK to move on.</string>
-    <string name="pref_btn_key_restore_old" translatable="false">btn_restore_old</string>
-    <string name="btn_restore_old">Restore Old DB</string>
-    <string name="txt_invalid_file_type">Given file doesn\'t seem like db backup</string>
-    <string name="pref_btn_key_rebuild_thumbnail" translatable="false">btn_rebuild_thumbnail</string>
-    <string name="btn_rebuild_thumbnail">Reload all thumnail again</string>
-    <string name="pref_cat_rebuild_thumbnail">Rebuild Thumnail</string>
-    <string name="txt_rebuild_thumnail_complete">Thumnails are reloaded</string>
-    <string name="txt_rebuild_thumnail_started">Thumnail reload has started in bacground</string>
 </resources>

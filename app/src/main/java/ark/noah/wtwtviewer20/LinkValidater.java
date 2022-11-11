@@ -18,8 +18,8 @@ public class LinkValidater {
     }
 
     public LinkValidater() {
-        if(Instance != null) Instance = this;
-        else return;
+        if(Instance != null) return;
+        Instance = this;
 
         isDebug = MainActivity.Instance.isDebug;
     }

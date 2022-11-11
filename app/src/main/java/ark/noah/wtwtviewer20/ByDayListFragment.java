@@ -4,33 +4,38 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.graphics.Insets;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CalendarView;
+import android.view.WindowInsets;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.widget.CompoundButton;
 
-import com.google.android.material.button.MaterialButton;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -103,6 +108,7 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         }
 
         ByDayListFragment fragment = this;
+        GestureDetector gestureDetector = new GestureDetector(requireContext(), new ByDayRecyclerGestureListener());
         binding.bydayRec.addOnItemTouchListener(new RecyclerTouchListener(requireContext().getApplicationContext(), binding.bydayRec, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
@@ -170,7 +176,13 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
 
                 popupMenu.show();
             }
-        }));
+        }) {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                gestureDetector.onTouchEvent(e);
+                return super.onInterceptTouchEvent(rv,e);
+            }
+        });
 
         return view;
     }
@@ -342,5 +354,51 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         binding.btnFri.setForeground(binding.btnFri.equals(lastInteractedView) ? foreground : null);
         binding.btnSat.setForeground(binding.btnSat.equals(lastInteractedView) ? foreground : null);
         binding.btnUnspecified.setForeground(binding.btnUnspecified.equals(lastInteractedView) ? foreground : null);
+    }
+
+    private View getButtonOfDay(ToonsContainer.ReleaseDay releaseDay) {
+        switch(releaseDay) {
+            case SUN:
+                return binding.btnSun;
+            case MON:
+                return binding.btnMon;
+            case TUE:
+                return binding.btnTue;
+            case WED:
+                return binding.btnWed;
+            case THU:
+                return binding.btnThu;
+            case FRI:
+                return binding.btnFri;
+            case SAT:
+                return binding.btnSat;
+        }
+        return null;
+    }
+
+    class ByDayRecyclerGestureListener extends GestureDetector.SimpleOnGestureListener {
+        public float SWIPE_DETECTION_MIN_DISTANCE;
+        public float SWIPE_DETECTION_MIN_VELOCITY;
+
+        public ByDayRecyclerGestureListener() {
+            DeviceSizeGetter dsg = DeviceSizeGetter.Instance;
+            SWIPE_DETECTION_MIN_DISTANCE = dsg.getDeviceWidth() * 0.05f;
+            SWIPE_DETECTION_MIN_VELOCITY = dsg.getDeviceWidth() * 0.1f;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            float swipeDistance = (e2.getX() - e1.getX());
+            Log.i("DebugLog","swipeDistance: " + swipeDistance);
+            Log.i("DebugLog","velocityX: " + velocityX);
+            if(Math.abs(swipeDistance) > SWIPE_DETECTION_MIN_DISTANCE) {
+                if(Math.abs(velocityX) > SWIPE_DETECTION_MIN_VELOCITY)
+                    if(swipeDistance < 0)           //swiped right to left
+                        Objects.requireNonNull(getButtonOfDay(dayToShow.getNext())).performClick();
+                    else if(swipeDistance > 0)      //swiped left to right
+                        Objects.requireNonNull(getButtonOfDay(dayToShow.getPrev())).performClick();
+            }
+            return super.onFling(e1, e2, velocityX, velocityY);
+        }
     }
 }

@@ -76,42 +76,13 @@ public class AddNewDialog extends DialogFragment {
     public void onResume() {
         super.onResume();
 
-        WindowManager windowManager = requireActivity().getWindowManager();
-        int width = 0;
-        int height = 0;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowMetrics windowMetrics = windowManager.getCurrentWindowMetrics();
-            WindowInsets windowInsets = windowMetrics.getWindowInsets();
-            Insets insets = windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars() | WindowInsets.Type.displayCutout());
-            Rect bounds = windowMetrics.getBounds();
-            width = bounds.width() - (insets.left + insets.right);
-            height = bounds.height() - (insets.top + insets.bottom);
-        }
-        else {
-            Display display = windowManager.getDefaultDisplay();
-            Point point = new Point();
-            display.getSize(point);
-            width = point.x;
-            height = point.y;
-        }
+        DeviceSizeGetter dsg = DeviceSizeGetter.Instance;
         WindowManager.LayoutParams params = Objects.requireNonNull(getDialog()).getWindow().getAttributes();
-        int portraitWidth = Math.min(width, height);
+        int portraitWidth = Math.min(dsg.getDeviceWidth(), dsg.getDeviceHeight());
         int dimenWidth = getResources().getDimensionPixelSize(R.dimen.dialog_width);
         int dimenTargetDeviceWidth = getResources().getDimensionPixelSize(R.dimen.dev_target_device_width);
         params.width = (int)(((float)dimenWidth/(float) dimenTargetDeviceWidth) * portraitWidth);
         Objects.requireNonNull(getDialog()).getWindow().setAttributes(params);
-    }
-
-    private float px2dp(float px){
-        Resources resources = this.getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        return px / ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-    }
-
-    public float dp2px(float dp){
-        Resources resources = this.getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        return dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     interface DialogInterface {

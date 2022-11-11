@@ -59,7 +59,7 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
         binding.webView.setWebViewClient(new MyBrowser());
         binding.webView.getSettings().setJavaScriptEnabled(true);
 
-        LinkGetter linkGetter = MainActivity.Instance.linkGetter;
+        LinkGetter linkGetter = LinkGetter.Instance;
         if(linkGetter != null)
             if(linkGetter.isReady())
                 entryPoint = linkGetter.getEntryPoint();

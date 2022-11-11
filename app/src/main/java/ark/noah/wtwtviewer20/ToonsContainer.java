@@ -170,18 +170,66 @@ public class ToonsContainer implements Parcelable {
             return 1 << getValue();
         }
 
-        public static int convertBitindexValueToNormal(int value) {
-            Log.i("DebugLog", "value: " + value);
-            if(value <= 0) return value;
+        public ReleaseDay getNext() {
+            int val = getValue();
+            if(val >= 1 && val <= 6)
+                return getDayFromCalendarDayOfWeek(val + 1);
+            else
+                switch (val) {
+                    default:
+                    case 8:
+                        return NON;
+                    case 7:
+                        return SUN;
+                    case 0:
+                        return ALL;
+                }
+        }
+
+        public ReleaseDay getPrev() {
+            int val = getValue();
+            if(val >= 2 && val <= 7)
+                return getDayFromCalendarDayOfWeek(val - 1);
+            else
+                switch (val) {
+                    default:
+                    case 0:
+                        return ALL;
+                    case 1:
+                        return SAT;
+                    case 8:
+                        return NON;
+                }
+        }
+
+        public static int convertBitShiftValueToRawValue(int bitshiftedValue) {
+            if(bitshiftedValue <= 0) return bitshiftedValue;
             int count = 0;
-            while(value != 1) {
-                value = (value >> 1);
+            while(bitshiftedValue != 1) {
+                bitshiftedValue = (bitshiftedValue >> 1);
                 ++count;
             }
-            Log.i("DebugLog", "count: " + count);
             return count;
         }
 
+        public ReleaseDay getDay(int val) {
+            if(val >= 1 && val <= 7)
+                return getDayFromCalendarDayOfWeek(val);
+            else
+                switch (val) {
+                    default:
+                    case 0:
+                        return NON;
+                    case 8:
+                        return ALL;
+                }
+        }
+
+        /**
+         * @param dayOfWeek Calendar.get(Calendar.DAY_OF_WEEK) result.
+         *                  1 = Sunday, 2 = Monday, ..., 7 = Saturday
+         * @return enum ReleaseDay
+         */
         public static ReleaseDay getDayFromCalendarDayOfWeek(int dayOfWeek) {
             switch(dayOfWeek)
             {

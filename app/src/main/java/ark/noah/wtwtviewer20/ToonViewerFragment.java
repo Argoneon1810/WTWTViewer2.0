@@ -1,7 +1,6 @@
 package ark.noah.wtwtviewer20;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
@@ -107,7 +106,7 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
             return new Pair<>(document, resultcode);
         }, this);
 
-        GestureDetector gestureDetector = new GestureDetector(this.getContext(), new MyGetureListener());
+        GestureDetector gestureDetector = new GestureDetector(this.getContext(), new ViewerListGetureListener());
         binding.listViewer.setOnTouchListener((view1, motionEvent) -> {
             gestureDetector.onTouchEvent(motionEvent);
             return false;
@@ -145,6 +144,22 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
         Navigation.findNavController(requireView()).navigate(R.id.action_toonViewerFragment_to_episodesListFragment, bundle);
     }
 
+    private void hideToolBar() {
+        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).hide();
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) binding.viewerRoot.getLayoutParams();
+        oldMargin = lp.topMargin;
+        lp.topMargin = 0;
+        binding.viewerRoot.setLayoutParams(lp);
+    }
+
+    private void showToolBar() {
+        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).show();
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) binding.viewerRoot.getLayoutParams();
+        lp.topMargin = oldMargin;
+        oldMargin = 0;
+        binding.viewerRoot.setLayoutParams(lp);
+    }
+
     @Override
     public void onComplete(Pair<Document, Integer> result) {
         if(result.second == 0) {
@@ -168,7 +183,13 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
     public void onError(Exception e) {
     }
 
-    class MyGetureListener extends GestureDetector.SimpleOnGestureListener {
+    @Override
+    public void onStop() {
+        super.onStop();
+        showToolBar();
+    }
+
+    class ViewerListGetureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
             if(showNavigator) {
@@ -182,28 +203,6 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
             }
             return super.onSingleTapUp(e);
         }
-    }
-
-    private void hideToolBar() {
-        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).hide();
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) binding.viewerRoot.getLayoutParams();
-        oldMargin = lp.topMargin;
-        lp.topMargin = 0;
-        binding.viewerRoot.setLayoutParams(lp);
-    }
-
-    private void showToolBar() {
-        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).show();
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) binding.viewerRoot.getLayoutParams();
-        lp.topMargin = oldMargin;
-        oldMargin = 0;
-        binding.viewerRoot.setLayoutParams(lp);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        showToolBar();
     }
 
     static class UnsupportedTypeException extends Exception {}

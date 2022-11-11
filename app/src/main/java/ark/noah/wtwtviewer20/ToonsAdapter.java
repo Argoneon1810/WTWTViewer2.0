@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
@@ -22,15 +21,11 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 
 public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> {
     private ArrayList<ToonsContainer> mData;
-    private SortManager sortManager;
 
     private Drawable foreground;
-
-    private boolean bResorted = true;
 
     Drawable ic_loading, ic_error, ic_empty;
 
@@ -82,22 +77,18 @@ public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> 
         boolean anymatch = false;
         for (Integer day : releaseWeekdays) {
             if (day == calendar.get(Calendar.DAY_OF_WEEK)) {
-                holder.cardView.setForeground(foreground);
+                holder.NewEntryIndicator.setVisibility(View.VISIBLE);
                 anymatch = true;
                 break;
             }
         }
-        if(!anymatch) holder.cardView.setForeground(null);
+        if(!anymatch)
+            holder.NewEntryIndicator.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public int getItemCount() {
         return mData.size();
-    }
-
-    public void setItemVisivility(int position, boolean beVisible) {
-        mData.get(position).hide = beVisible;
-        notifyItemChanged(position);
     }
 
     public int deleteAndGetDBIDof(ToonsContainer item) {
@@ -112,67 +103,25 @@ public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> 
         return mData;
     }
 
-    public SortManager getSortManager() { return sortManager; }
-    public void sortData(Comparator<ToonsContainer> toonsContainerComparator) {
-        mData.sort(toonsContainerComparator);
-        bResorted = true;
-        notifyDataSetChanged();     //list after sort might be completely different from list before sort, so no choice.
-    }
-
-    public boolean isResorted() {
-        if(bResorted) {
-            bResorted = false;
-            return true;
-        }
-        return false;
-    }
-
     public ToonsAdapter(ArrayList<ToonsContainer> list) {
         mData = list;
-        sortManager = new SortManager();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        CardView cardView;
         ImageView Thumbnail;
         TextView ToonName;
         TextView ReleaseWeekday;
 
+        CardView NewEntryIndicator;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            cardView = itemView.findViewById(R.id.card_rec_main);
             Thumbnail = itemView.findViewById(R.id.img_toons_thumbnail);
             ToonName = itemView.findViewById(R.id.tv_toons_title);
             ReleaseWeekday = itemView.findViewById(R.id.tv_toons_release);
-        }
-    }
 
-    enum SortType {
-        FIFO,
-        ALPHABET,
-        RELEASEDAY,
-    }
-    enum SortDirection {
-        ASCENDING,
-        DESCENDING,
-    }
-
-    class SortManager {
-        private SortType sortType = SortType.FIFO;
-        private SortDirection sortDirection = SortDirection.ASCENDING;
-
-        public boolean isSortedByAlphabet() { return sortType == SortType.ALPHABET; }
-        public boolean isSortedByFIFO() { return sortType == SortType.FIFO; }
-        public boolean isSortedByReleaseDay() { return sortType == SortType.RELEASEDAY; }
-        public void setSortType(SortType sortType) { this.sortType = sortType; }
-
-        public boolean isAscending() { return sortDirection == SortDirection.ASCENDING; }
-        public void setSortDirection(SortDirection dir) { sortDirection = dir; }
-
-        @NonNull
-        public String toString() {
-            return sortType.toString() + " " + sortDirection.toString();
+            NewEntryIndicator = itemView.findViewById(R.id.toons_new_indicator);
         }
     }
 }

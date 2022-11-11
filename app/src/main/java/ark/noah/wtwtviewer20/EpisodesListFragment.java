@@ -97,7 +97,7 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
         new ExecutorRunner().execute(()->{
             Document document = null;
             try {
-                document = Jsoup.connect(MainActivity.Instance.linkGetter.getEntryPoint() + currentContainer.toonType + 1 + "?toon=" + currentContainer.toonID).get();
+                document = Jsoup.connect(LinkGetter.Instance.getEntryPoint() + currentContainer.toonType + 1 + "?toon=" + currentContainer.toonID).get();
 
                 Elements element = document.select("div.left-box").select("ul.list");
 

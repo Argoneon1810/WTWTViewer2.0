@@ -2,6 +2,7 @@ package ark.noah.wtwtviewer20;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -22,28 +23,30 @@ public class LinkGetter {
     public static LinkGetter Instance;
 
     private SharedPreferences sharedPreferences;
-    private Context context;
+    private Resources resources;
     private ArrayList<String> entrypointArrayList;
 
     private boolean isReady = false;
+    private String pref_key_entrypoint;
     private String validEntryPoint;
 
     private Callback callback;
 
     public LinkGetter(Context context, Callback callback) {
+        if(Instance != null) return;
+        Instance = this;
+
         isDebug = MainActivity.Instance.isDebug;
 
-        if(isDebug) Log.i("DebugLog", "is LinkGetter.Instance before constructor null? " + String.valueOf(Instance==null));
-        if(Instance != null) return;
-        else Instance = this;
-
         this.callback = callback;
-        this.context = context;
 
         Thread entryLinkGetterThread = new Thread(this::run);
         entrypointArrayList = new ArrayList<>();
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        resources = context.getResources();
+        pref_key_entrypoint = context.getString(R.string.pref_key_entrypoint);
 
         entryLinkGetterThread.start();
     }
@@ -62,8 +65,8 @@ public class LinkGetter {
         try {
             doc = Jsoup.connect(
                     sharedPreferences.getString(
-                            context.getString(R.string.pref_key_entrypoint),
-                            context.getResources().getStringArray(R.array.entry_points)[5]   //default value
+                            pref_key_entrypoint,
+                            resources.getStringArray(R.array.entry_points)[5]   //default value
                     )
             ).get();
 

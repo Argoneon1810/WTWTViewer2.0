@@ -6,44 +6,63 @@
     <string name="nav_option_complete">완결</string>
     <string name="nav_option_settings">설정</string>
     <string name="hint_title">제목</string>
-    <string name="day_sun_short">일</string>
     <string name="list_option_show_hidden">숨김 항목 표시</string>
     <string name="list_option_show_completed">완결 항목 표시</string>
+    <!-- Preference Titles -->
+
+    <!-- Messages Preferences -->
+
+    <!-- Sync Preferences -->
     <string name="frag_title_all_list">모든 만화</string>
     <string name="frag_title_by_day">연재일별 분류</string>
     <string name="frag_title_completed">완결작</string>
     <string name="frag_title_settings">설정</string>
+
+    <string name="day_sun_short">일</string>
     <string name="day_mon_short">월</string>
     <string name="day_tue_short">화</string>
     <string name="day_wed_short">수</string>
     <string name="day_thu_short">목</string>
     <string name="day_fri_short">금</string>
     <string name="day_sat_short">토</string>
+    <string name="day_unspecified">비정기</string>
+
     <string name="pref_cat_entrypoints">진입점</string>
     <string name="pref_desc_entrypoints">만화를 불러올 진입점을 선택해 주세요.</string>
     <string name="pref_cat_backup_restore">백업 및 복원</string>
     <string name="pref_btn_backup">백업</string>
     <string name="pref_btn_restore">복원</string>
     <string name="pref_btn_clear">초기화</string>
-    <string name="day_unspecified">비정기</string>
-    <string name="txt_plswait">잠시만 기다려 주십시오.</string>
+
+    <string name="pref_cat_restore_old">구버전 복구</string>
+    <string name="btn_restore_old">구버전 DB 복구</string>
+    <string name="pref_cat_rebuild_thumbnail">섬네일 리빌드</string>
+    <string name="btn_rebuild_thumbnail">모든 섬네일 다시 불러오기</string>
+
     <string name="dialog_from_web">웹에서 가져오기</string>
     <string name="dialog_txt_url">링크 주소</string>
     <string name="dialog_desc_addnew">새 항목 생성</string>
+
     <string name="btn_web_addthispage">이 페이지 추가</string>
+
     <string name="hint_toonid">작품 ID</string>
     <string name="hint_epiid">에피소드 번호</string>
     <string name="hint_toontype">작품 분류</string>
+
     <string name="menu_edit">수정</string>
     <string name="menu_delete">삭제</string>
+
     <string name="action_set_hide">숨기기</string>
     <string name="action_set_show">숨기기 해제</string>
+    <string name="action_set_complete">완결작 등록</string>
+    <string name="action_set_incomplete">완결작 등록 해제</string>
+
     <string name="frag_title_edit_entry">항목 수정</string>
     <string name="frag_title_review_entry">신규 항목 확인</string>
     <string name="frag_title_episode_list">에피소드 리스트</string>
     <string name="frag_title_viewer">뷰어</string>
-    <string name="action_set_complete">완결작 등록</string>
-    <string name="action_set_incomplete">완결작 등록 해제</string>
+
+    <string name="txt_plswait">잠시만 기다려 주십시오.</string>
     <string name="txt_invalid_title">제목은 공백일 수 없습니다!</string>
     <string name="txt_something_went_wrong">예상치 못한 문제가 발생했습니다</string>
     <string name="txt_invalid_episode_id">유효하지 않은 회차 번호입니다</string>
@@ -54,16 +73,13 @@
     <string name="txt_restore_successfully">성공적으로 복원했습니다</string>
     <string name="txt_restore_failed">복원에 실패했습니다</string>
     <string name="txt_backup_failed">백업에 실패했습니다</string>
-    <string name="dialog_body_warning">정말로 DB를 모두 초기화합니까?</string>
-    <string name="dialog_title_warning">경고!</string>
-    <string name="dialog_btn_cancel_positive">돌아가기</string>
-    <string name="dialog_btn_clear_negative">모두 지우기</string>
-    <string name="pref_cat_restore_old">구버전 복구</string>
     <string name="txt_desc_restore_old">구버전 DB 지원 목적의 항목입니다. 이것이 무엇인지 잘 모르겠다면 무시하셔도 무방합니다.</string>
-    <string name="btn_restore_old">구버전 DB 복구</string>
     <string name="txt_invalid_file_type">DB 백업 파일이 아닌 것 같습니다.</string>
-    <string name="btn_rebuild_thumbnail">모든 섬네일 다시 불러오기</string>
-    <string name="pref_cat_rebuild_thumbnail">섬네일 리빌드</string>
     <string name="txt_rebuild_thumnail_complete">섬네일 리로드가 완료되었습니다</string>
     <string name="txt_rebuild_thumnail_started">백그라운드에서 섬네일 리로드를 진행중입니다</string>
+
+    <string name="dialog_body_warning">정말로 DB를 모두 초기화합니까?</string>
+    <string name="dialog_title_warning">경고!</string>
+    <string name="dialog_btn_clear_negative">모두 지우기</string>
+    <string name="dialog_btn_cancel_positive">돌아가기</string>
 </resources>
