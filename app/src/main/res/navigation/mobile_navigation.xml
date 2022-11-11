@@ -75,8 +75,8 @@
     <fragment
         android:id="@+id/waitFragment"
         android:name="ark.noah.wtwtviewer20.WaitFragment"
-        android:label="@string/txt_plswait"
-        tools:layout="@layout/fragment_wait" >
+        android:label="@string/frag_title_wait"
+        tools:layout="@layout/fragment_wait">
         <action
             android:id="@+id/action_waitFragment_to_allListFragment3"
             app:destination="@id/allListFragment"

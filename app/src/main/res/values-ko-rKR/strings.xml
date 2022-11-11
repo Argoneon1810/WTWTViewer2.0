@@ -62,7 +62,7 @@
     <string name="frag_title_episode_list">에피소드 리스트</string>
     <string name="frag_title_viewer">뷰어</string>
 
-    <string name="txt_plswait">잠시만 기다려 주십시오.</string>
+    <string name="txt_plswait">앱이 유효한 접근점을 가져오고 있습니다. 잠시만 기다려 주십시오.</string>
     <string name="txt_invalid_title">제목은 공백일 수 없습니다!</string>
     <string name="txt_something_went_wrong">예상치 못한 문제가 발생했습니다</string>
     <string name="txt_invalid_episode_id">유효하지 않은 회차 번호입니다</string>
@@ -82,4 +82,7 @@
     <string name="dialog_title_warning">경고!</string>
     <string name="dialog_btn_clear_negative">모두 지우기</string>
     <string name="dialog_btn_cancel_positive">돌아가기</string>
+    <string name="frag_title_wait">로딩중</string>
+    <string name="txt_pls_wait_episodes">앱이 웹에서 에피소드 리스트를 가져오는 동안 잠시만 기다려 주십시오</string>
+    <string name="txt_pirate">해적의 해적</string>
 </resources>

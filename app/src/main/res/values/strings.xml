@@ -82,7 +82,7 @@
     <string name="frag_title_episode_list">Episodes List</string>
     <string name="frag_title_viewer">Viewer</string>
 
-    <string name="txt_plswait">Please wait for a moment.</string>
+    <string name="txt_plswait">Please wait for a moment while app is getting a valid link of entrypoint.</string>
     <string name="txt_invalid_title">Title shouldn\'t be empty!</string>
     <string name="txt_something_went_wrong">Something went wrong</string>
     <string name="txt_invalid_episode_id">There is no such episode</string>
@@ -104,4 +104,7 @@
     <string name="dialog_title_warning">Warning!</string>
     <string name="dialog_btn_clear_negative">Clear All</string>
     <string name="dialog_btn_cancel_positive">Back</string>
+    <string name="frag_title_wait">Loading</string>
+    <string name="txt_pls_wait_episodes">Please wait shortly while app is getting a list of episodes from web</string>
+    <string name="txt_pirate">Pirate of a pirate</string>
 </resources>

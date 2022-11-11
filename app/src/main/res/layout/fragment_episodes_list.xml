@@ -21,6 +21,20 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:listitem="@layout/recycler_episode_item" />
 
+        <TextView
+            android:id="@+id/tv_rec_episodes_wait"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:text="@string/txt_pls_wait_episodes"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

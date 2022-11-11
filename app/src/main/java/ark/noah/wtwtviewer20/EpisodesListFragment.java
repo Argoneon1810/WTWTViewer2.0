@@ -73,7 +73,11 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
         }
 
         ArrayList<EpisodesContainer> mData = dbHelper.getAllEpisodes(currentContainer);
-        mData.sort(Comparator.comparing((ec) -> ec.number));
+        if(mData.size() == 0) binding.tvRecEpisodesWait.setVisibility(View.VISIBLE);
+        else {
+            binding.tvRecEpisodesWait.setVisibility(View.GONE);
+            mData.sort(Comparator.comparing((ec) -> ec.number));
+        }
         EpisodesAdapter adapter = new EpisodesAdapter(mData, currentContainer, this::onClick, this);
         binding.recEpisodes.setAdapter(adapter);
         RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(requireContext()) {
@@ -145,6 +149,7 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
             }
 
             if (containers.size() > 0) {
+                binding.tvRecEpisodesWait.setVisibility(View.GONE);
                 EpisodesAdapter adapter = (EpisodesAdapter) binding.recEpisodes.getAdapter();
                 Objects.requireNonNull(adapter).addAtFront(containers);
                 binding.recEpisodes.scrollToPosition(adapter.getPositionOfEpisode(containers.get(0).number));
