@@ -401,17 +401,21 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
     }
 
     class ByDayRecyclerGestureListener extends GestureDetector.SimpleOnGestureListener {
+        public float SWIPE_DETECTION_OFF_PATH;
         public float SWIPE_DETECTION_MIN_DISTANCE;
         public float SWIPE_DETECTION_MIN_VELOCITY;
 
         public ByDayRecyclerGestureListener() {
             DeviceSizeGetter dsg = DeviceSizeGetter.Instance;
-            SWIPE_DETECTION_MIN_DISTANCE = dsg.getDeviceWidth() * 0.05f;
+            SWIPE_DETECTION_OFF_PATH = dsg.getDeviceWidth() * 0.2f;
+            SWIPE_DETECTION_MIN_DISTANCE = dsg.getDeviceWidth() * 0.2f;
             SWIPE_DETECTION_MIN_VELOCITY = dsg.getDeviceWidth() * 0.1f;
         }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if(Math.abs(e1.getY() - e2.getY()) > SWIPE_DETECTION_OFF_PATH)
+                return false;
             float swipeDistance = (e2.getX() - e1.getX());
             if(Math.abs(swipeDistance) > SWIPE_DETECTION_MIN_DISTANCE)
                 if(Math.abs(velocityX) > SWIPE_DETECTION_MIN_VELOCITY)
