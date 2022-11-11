@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -27,11 +28,15 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.CompoundButton;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import ark.noah.wtwtviewer20.databinding.FragmentByDayListBinding;
 
@@ -91,20 +96,15 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         byDayViewModel.dayToShow.observe(getViewLifecycleOwner(), o -> loadRecyclerItemFiltered());
 
         assignButtonListeners();
-        highlightLastSelectionOrToday();
-        loadRecyclerItemFiltered();
 
         addNewDialogFragment = new AddNewDialog(this);
 
         binding.fabByday.setOnClickListener(v -> addNewDialogFragment.show(getParentFragmentManager(), AddNewDialog.TAG));
 
         Bundle receivedBundle = getArguments();
-        if(receivedBundle != null) {
-            byte junk = receivedBundle.getByte(getString(R.string.bundle_junk));
-            if(junk == 0) {
+        if(receivedBundle != null)
+            if(receivedBundle.getByte(getString(R.string.bundle_junk)) == 0)
                 loadRecyclerItemFiltered();
-            }
-        }
 
         ByDayListFragment fragment = this;
         GestureDetector gestureDetector = new GestureDetector(requireContext(), new ByDayRecyclerGestureListener());
@@ -183,6 +183,14 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
             }
         });
 
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                clickAndFocus(Objects.requireNonNull(getButtonOfDay(Objects.requireNonNull(byDayViewModel.dayToShow.getValue()))));
+                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+
         return view;
     }
 
@@ -195,8 +203,24 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         binding.sBydayShowcompleted.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false));
         if(isDebug) Log.i("DebugLog","SwitchCompat states of ByDayListFragment are recovered");
 
-        binding.sBydayShowhidden.setOnCheckedChangeListener(this::onCheckedChangedShowHidden);
-        binding.sBydayShowcompleted.setOnCheckedChangeListener(this::onCheckedChangedShowCompleted);
+        binding.sBydayShowhidden.setOnCheckedChangeListener((cb, b) -> {
+            if(isDebug) Log.i("DebugLog","Detected change in switch show hidden of ByDayListFragment");
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(getString(R.string.shared_pref_showhidden_key), b);
+            editor.apply();
+
+            loadRecyclerItemFiltered();
+        });
+        binding.sBydayShowcompleted.setOnCheckedChangeListener((cb, b) -> {
+            if(isDebug) Log.i("DebugLog","Detected change in switch show completed of ByDayListFragment");
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(getString(R.string.shared_pref_showcompleted_key), b);
+            editor.apply();
+
+            loadRecyclerItemFiltered();
+        });
         if(isDebug) Log.i("DebugLog","OnCheckedChangeListeners of ByDayListFragment is reloaded");
     }
 
@@ -224,45 +248,7 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         binding.bydayRec.setAdapter(new ToonsAdapter(containers));
     }
 
-    private void onCheckedChangedShowHidden(CompoundButton cb, boolean b) {
-        if(isDebug) Log.i("DebugLog","Detected change in switch show hidden of ByDayListFragment");
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.shared_pref_showhidden_key), b);
-        editor.apply();
-
-        loadRecyclerItemFiltered();
-    }
-
-    private void onCheckedChangedShowCompleted(CompoundButton cb, boolean b) {
-        if(isDebug) Log.i("DebugLog","Detected change in switch show completed of ByDayListFragment");
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.shared_pref_showcompleted_key), b);
-        editor.apply();
-
-        loadRecyclerItemFiltered();
-    }
-
-    @Override
-    public void onProceedButtonClicked(View v, String validatedUrl) {
-        NavController navController = Navigation.findNavController(this.requireView());
-        Bundle bundle = new Bundle();
-        bundle.putInt(getString(R.string.bundle_from), INDEX);
-        bundle.putString(getString(R.string.bundle_link), validatedUrl);
-        navController.navigate(R.id.action_byDayListFragment_to_reviewEntryFragment, bundle);
-    }
-
-    @Override
-    public void onWebButtonClicked(View v) {
-        NavController navController = Navigation.findNavController(this.requireView());
-        Bundle bundle = new Bundle();
-        bundle.putInt(getString(R.string.bundle_from), INDEX);
-        navController.navigate(R.id.action_byDayListFragment_to_addByWebFragment, bundle);
-    }
-
-    private void assignButtonListeners()
-    {
+    private void assignButtonListeners() {
         binding.btnSun.setOnClickListener((v) -> {
             highlightView(v);
             byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.SUN);
@@ -297,19 +283,17 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         });
     }
 
-    private void highlightLastSelectionOrToday()
-    {
-        highlightView(getButtonOfDay(Objects.requireNonNull(byDayViewModel.dayToShow.getValue())));
+    private void clickAndFocus(View view) {
+        view.performClick();
+        view.requestRectangleOnScreen(new Rect(0, 0, view.getWidth(), view.getHeight()), false);
     }
 
-    private void highlightView(View view)
-    {
+    private void highlightView(View view) {
         lastInteractedView = view;
         applyHighlightState();
     }
 
-    private void applyHighlightState()
-    {
+    private void applyHighlightState() {
         binding.btnSun.setForeground(binding.btnSun.equals(lastInteractedView) ? foreground : null);
         binding.btnMon.setForeground(binding.btnMon.equals(lastInteractedView) ? foreground : null);
         binding.btnTue.setForeground(binding.btnTue.equals(lastInteractedView) ? foreground : null);
@@ -340,6 +324,23 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         return null;
     }
 
+    @Override
+    public void onProceedButtonClicked(View v, String validatedUrl) {
+        NavController navController = Navigation.findNavController(this.requireView());
+        Bundle bundle = new Bundle();
+        bundle.putInt(getString(R.string.bundle_from), INDEX);
+        bundle.putString(getString(R.string.bundle_link), validatedUrl);
+        navController.navigate(R.id.action_byDayListFragment_to_reviewEntryFragment, bundle);
+    }
+
+    @Override
+    public void onWebButtonClicked(View v) {
+        NavController navController = Navigation.findNavController(this.requireView());
+        Bundle bundle = new Bundle();
+        bundle.putInt(getString(R.string.bundle_from), INDEX);
+        navController.navigate(R.id.action_byDayListFragment_to_addByWebFragment, bundle);
+    }
+
     class ByDayRecyclerGestureListener extends GestureDetector.SimpleOnGestureListener {
         public float SWIPE_DETECTION_MIN_DISTANCE;
         public float SWIPE_DETECTION_MIN_VELOCITY;
@@ -353,16 +354,53 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             float swipeDistance = (e2.getX() - e1.getX());
-            Log.i("DebugLog","swipeDistance: " + swipeDistance);
-            Log.i("DebugLog","velocityX: " + velocityX);
-            if(Math.abs(swipeDistance) > SWIPE_DETECTION_MIN_DISTANCE) {
+            if(Math.abs(swipeDistance) > SWIPE_DETECTION_MIN_DISTANCE)
                 if(Math.abs(velocityX) > SWIPE_DETECTION_MIN_VELOCITY)
-                    if(swipeDistance < 0)           //swiped right to left
-                        Objects.requireNonNull(getButtonOfDay(Objects.requireNonNull(byDayViewModel.dayToShow.getValue()).getNext())).performClick();
-                    else if(swipeDistance > 0)      //swiped left to right
-                        Objects.requireNonNull(getButtonOfDay(Objects.requireNonNull(byDayViewModel.dayToShow.getValue()).getPrev())).performClick();
-            }
+                    //swiped right to left
+                    if (swipeDistance < 0) clickAndFocus(getButtonOfTomorrow());
+                    //swiped left to right
+                    else if (swipeDistance > 0) clickAndFocus(getButtonOfYesterday());
             return super.onFling(e1, e2, velocityX, velocityY);
+        }
+
+        private View getButtonOfTomorrow() {
+            if(lastInteractedView == binding.btnSun)
+                return binding.btnMon;
+            else if(lastInteractedView == binding.btnMon)
+                return binding.btnTue;
+            else if(lastInteractedView == binding.btnTue)
+                return binding.btnWed;
+            else if(lastInteractedView == binding.btnWed)
+                return binding.btnThu;
+            else if(lastInteractedView == binding.btnThu)
+                return binding.btnFri;
+            else if(lastInteractedView ==  binding.btnFri)
+                return binding.btnSat;
+            else if(lastInteractedView ==  binding.btnSat)
+                return binding.btnUnspecified;
+            else if(lastInteractedView ==  binding.btnUnspecified)
+                return binding.btnSun;
+            else return binding.btnUnspecified;
+        }
+
+        private View getButtonOfYesterday() {
+            if(lastInteractedView == binding.btnSun)
+                return binding.btnUnspecified;
+            else if(lastInteractedView == binding.btnMon)
+                return binding.btnSun;
+            else if(lastInteractedView == binding.btnTue)
+                return binding.btnMon;
+            else if(lastInteractedView == binding.btnWed)
+                return binding.btnTue;
+            else if(lastInteractedView == binding.btnThu)
+                return binding.btnWed;
+            else if(lastInteractedView ==  binding.btnFri)
+                return binding.btnThu;
+            else if(lastInteractedView ==  binding.btnSat)
+                return binding.btnFri;
+            else if(lastInteractedView ==  binding.btnUnspecified)
+                return binding.btnSat;
+            else return binding.btnUnspecified;
         }
     }
 }
