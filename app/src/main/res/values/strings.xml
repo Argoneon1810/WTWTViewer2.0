@@ -75,6 +75,7 @@
     <string name="menu_by_id">By Enlistment ID</string>
     <string name="menu_by_name">By Title</string>
     <string name="menu_sort">Sort</string>
+    <string name="menu_view_on_web">View on Web</string>
 
     <string name="action_set_hide">Set Hidden</string>
     <string name="action_set_show">Set Visible</string>

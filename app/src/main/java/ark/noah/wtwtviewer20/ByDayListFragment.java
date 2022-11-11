@@ -208,7 +208,7 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
             @Override
             public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
                 ((MenuBuilder) menu).setOptionalIconsVisible(true);
-                menuInflater.inflate(R.menu.sort_menu_byday, menu);
+                menuInflater.inflate(R.menu.sort_by_day, menu);
             }
 
             @Override

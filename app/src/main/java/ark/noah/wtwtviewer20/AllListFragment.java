@@ -175,7 +175,7 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
             @Override
             public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
                 ((MenuBuilder) menu).setOptionalIconsVisible(true);
-                menuInflater.inflate(R.menu.sort_menu, menu);
+                menuInflater.inflate(R.menu.sort, menu);
             }
 
             @Override

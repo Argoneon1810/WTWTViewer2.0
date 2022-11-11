@@ -131,7 +131,7 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
         requireActivity().addMenuProvider(new MenuProvider() {
             @Override
             public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
-                menuInflater.inflate(R.menu.sort_menu_episode, menu);
+                menuInflater.inflate(R.menu.sort_episode, menu);
             }
 
             @SuppressLint("NonConstantResourceId")

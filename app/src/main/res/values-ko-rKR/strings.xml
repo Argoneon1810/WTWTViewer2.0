@@ -54,7 +54,8 @@
     <string name="menu_by_day">출시순</string>
     <string name="menu_by_id">등록순</string>
     <string name="menu_by_name">제목순</string>
-    <string name="menu_sort">Sort</string>
+    <string name="menu_sort">정렬</string>
+    <string name="menu_view_on_web">웹에서 보기</string>
 
     <string name="action_set_hide">숨기기</string>
     <string name="action_set_show">숨기기 해제</string>
