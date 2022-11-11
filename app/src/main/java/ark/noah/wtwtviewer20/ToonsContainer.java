@@ -225,6 +225,12 @@ public class ToonsContainer implements Parcelable {
                 }
         }
 
+        public static ReleaseDay getToday() {
+            Calendar calendar = Calendar.getInstance();
+            int day = calendar.get(Calendar.DAY_OF_WEEK);
+            return getDayFromCalendarDayOfWeek(day);
+        }
+
         /**
          * @param dayOfWeek Calendar.get(Calendar.DAY_OF_WEEK) result.
          *                  1 = Sunday, 2 = Monday, ..., 7 = Saturday

@@ -4,25 +4,21 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Insets;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,13 +27,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
-import android.view.WindowManager;
-import android.view.WindowMetrics;
 import android.widget.CompoundButton;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -56,7 +48,7 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
     private Drawable foreground;
 
     private View lastInteractedView;
-    private ToonsContainer.ReleaseDay dayToShow;
+    private ByDayViewModel byDayViewModel;
 
     private AddNewDialog addNewDialogFragment;
 
@@ -91,8 +83,15 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         binding.sBydayShowhidden.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false));
         binding.sBydayShowcompleted.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false));
 
+        byDayViewModel = new ViewModelProvider(requireActivity()).get(ByDayViewModel.class);
+        if(byDayViewModel.hasBeenFlipped.getValue() == null) {
+            byDayViewModel.hasBeenFlipped.setValue(Boolean.TRUE);
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.getToday());
+        }
+        byDayViewModel.dayToShow.observe(getViewLifecycleOwner(), o -> loadRecyclerItemFiltered());
+
         assignButtonListeners();
-        highlightToday();
+        highlightLastSelectionOrToday();
         loadRecyclerItemFiltered();
 
         addNewDialogFragment = new AddNewDialog(this);
@@ -212,10 +211,10 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
     }
 
     private void loadRecyclerItemFiltered() {
-        if(isDebug) Log.i("DebugLog", "day to show: " + dayToShow);
-        if(isDebug) Log.i("DebugLog", "day to show (int): " + dayToShow.getValue());
+        if(isDebug) Log.i("DebugLog", "day to show: " + byDayViewModel.dayToShow.getValue());
+        if(isDebug) Log.i("DebugLog", "day to show (int): " + Objects.requireNonNull(byDayViewModel.dayToShow.getValue()).getValue());
         ArrayList<ToonsContainer> containers = dbHelper.getAllToonsFiltered(
-                dayToShow,
+                byDayViewModel.dayToShow.getValue(),
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false),
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false),
                 false,
@@ -266,76 +265,41 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
     {
         binding.btnSun.setOnClickListener((v) -> {
             highlightView(v);
-            dayToShow = ToonsContainer.ReleaseDay.SUN;
-            loadRecyclerItemFiltered();
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.SUN);
         });
         binding.btnMon.setOnClickListener((v) -> {
             highlightView(v);
-            dayToShow = ToonsContainer.ReleaseDay.MON;
-            loadRecyclerItemFiltered();
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.MON);
         });
         binding.btnTue.setOnClickListener((v) -> {
             highlightView(v);
-            dayToShow = ToonsContainer.ReleaseDay.TUE;
-            loadRecyclerItemFiltered();
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.TUE);
         });
         binding.btnWed.setOnClickListener((v) -> {
             highlightView(v);
-            dayToShow = ToonsContainer.ReleaseDay.WED;
-            loadRecyclerItemFiltered();
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.WED);
         });
         binding.btnThu.setOnClickListener((v) -> {
             highlightView(v);
-            dayToShow = ToonsContainer.ReleaseDay.THU;
-            loadRecyclerItemFiltered();
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.THU);
         });
         binding.btnFri.setOnClickListener((v) -> {
             highlightView(v);
-            dayToShow = ToonsContainer.ReleaseDay.FRI;
-            loadRecyclerItemFiltered();
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.FRI);
         });
         binding.btnSat.setOnClickListener((v) -> {
             highlightView(v);
-            dayToShow = ToonsContainer.ReleaseDay.SAT;
-            loadRecyclerItemFiltered();
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.SAT);
         });
         binding.btnUnspecified.setOnClickListener((v) -> {
             highlightView(v);
-            dayToShow = ToonsContainer.ReleaseDay.NON;
-            loadRecyclerItemFiltered();
+            byDayViewModel.dayToShow.setValue(ToonsContainer.ReleaseDay.NON);
         });
     }
 
-    private void highlightToday()
+    private void highlightLastSelectionOrToday()
     {
-        Calendar calendar = Calendar.getInstance();
-        int day = calendar.get(Calendar.DAY_OF_WEEK);
-        dayToShow = ToonsContainer.ReleaseDay.getDayFromCalendarDayOfWeek(day);
-        switch(day)
-        {
-            default:
-            case Calendar.SUNDAY:
-                highlightView(binding.btnSun);
-                break;
-            case Calendar.MONDAY:
-                highlightView(binding.btnMon);
-                break;
-            case Calendar.TUESDAY:
-                highlightView(binding.btnTue);
-                break;
-            case Calendar.WEDNESDAY:
-                highlightView(binding.btnWed);
-                break;
-            case Calendar.THURSDAY:
-                highlightView(binding.btnThu);
-                break;
-            case Calendar.FRIDAY:
-                highlightView(binding.btnFri);
-                break;
-            case Calendar.SATURDAY:
-                highlightView(binding.btnSat);
-                break;
-        }
+        highlightView(getButtonOfDay(Objects.requireNonNull(byDayViewModel.dayToShow.getValue())));
     }
 
     private void highlightView(View view)
@@ -394,9 +358,9 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
             if(Math.abs(swipeDistance) > SWIPE_DETECTION_MIN_DISTANCE) {
                 if(Math.abs(velocityX) > SWIPE_DETECTION_MIN_VELOCITY)
                     if(swipeDistance < 0)           //swiped right to left
-                        Objects.requireNonNull(getButtonOfDay(dayToShow.getNext())).performClick();
+                        Objects.requireNonNull(getButtonOfDay(Objects.requireNonNull(byDayViewModel.dayToShow.getValue()).getNext())).performClick();
                     else if(swipeDistance > 0)      //swiped left to right
-                        Objects.requireNonNull(getButtonOfDay(dayToShow.getPrev())).performClick();
+                        Objects.requireNonNull(getButtonOfDay(Objects.requireNonNull(byDayViewModel.dayToShow.getValue()).getPrev())).performClick();
             }
             return super.onFling(e1, e2, velocityX, velocityY);
         }
