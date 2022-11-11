@@ -107,4 +107,7 @@
     <string name="frag_title_wait">Loading</string>
     <string name="txt_pls_wait_episodes">Please wait shortly while app is getting a list of episodes from web</string>
     <string name="txt_pirate">Pirate of a pirate</string>
+    <string name="menu_by_day">By Release</string>
+    <string name="menu_by_id">By Enlistment ID</string>
+    <string name="menu_by_name">By Title</string>
 </resources>

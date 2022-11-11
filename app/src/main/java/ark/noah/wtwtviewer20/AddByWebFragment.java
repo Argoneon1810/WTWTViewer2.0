@@ -7,11 +7,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +25,6 @@ import java.io.IOException;
 import ark.noah.wtwtviewer20.databinding.FragmentAddByWebBinding;
 
 public class AddByWebFragment extends Fragment implements ExecutorRunner.Callback<Document> {
-
-    private boolean isDebug = true;
-
     private FragmentAddByWebBinding binding;
 
     private String entryPoint;
@@ -52,8 +47,6 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
 
         linkValidater = LinkValidater.Instance != null ? LinkValidater.Instance : new LinkValidater();
 
-        isDebug = MainActivity.Instance.isDebug;
-
         camefrom = requireArguments().getInt(getString(R.string.bundle_from));
 
         binding.webView.setWebViewClient(new MyBrowser());
@@ -63,7 +56,6 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
         if(linkGetter != null)
             if(linkGetter.isReady())
                 entryPoint = linkGetter.getEntryPoint();
-        if(isDebug) Log.i("DebugLog","entrypoint: " + entryPoint);
 
         new ExecutorRunner().execute(() -> {
             Document document = null;
@@ -94,7 +86,6 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
 
         binding.webView.loadDataWithBaseURL(entryPoint, result.toString(), "text/html", "utf-8", "");
         currentlyVisibleUrlInString = result.location();
-        if(isDebug) Log.i("DebugLog","current url: " + currentlyVisibleUrlInString);
 
         if(linkValidater.isLinkValidEpisodeList(currentlyVisibleUrlInString))
             binding.btnWebAddthispage.setVisibility(View.VISIBLE);

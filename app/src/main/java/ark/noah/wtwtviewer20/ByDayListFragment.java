@@ -2,8 +2,11 @@ package ark.noah.wtwtviewer20;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -11,32 +14,32 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.CompoundButton;
-import android.widget.HorizontalScrollView;
-import android.widget.LinearLayout;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 import ark.noah.wtwtviewer20.databinding.FragmentByDayListBinding;
 
@@ -48,14 +51,16 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
     private DBHelper dbHelper;
     private SharedPreferences sharedPreferences;
 
-    private boolean isDebug = true;
-
-    private Drawable foreground;
+    private Drawable foreground, ic_up, ic_down;
+    BlendModeColorFilter iconColorFilter;
 
     private View lastInteractedView;
     private ByDayViewModel byDayViewModel;
 
     private AddNewDialog addNewDialogFragment;
+
+    int lastSortMethod = 0;
+    boolean descending = false;
 
     public static ByDayListFragment newInstance() {
         return new ByDayListFragment();
@@ -66,6 +71,7 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         super.onDestroyView();
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater,
@@ -75,11 +81,17 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         binding = FragmentByDayListBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
-        isDebug = MainActivity.Instance.isDebug;
-
         TypedValue value = new TypedValue();
         requireContext().getTheme().resolveAttribute(R.attr.ButtonFocusedForegroundTransparent, value, true);
         foreground = new ColorDrawable(value.data);
+
+        value = new TypedValue();
+        requireContext().getTheme().resolveAttribute(android.R.attr.textColor, value, true);
+        iconColorFilter = new BlendModeColorFilter(value.data, BlendMode.SRC_ATOP);
+        ic_up = requireContext().getDrawable(R.drawable.ic_baseline_arrow_drop_up_24).mutate();
+        ic_down = requireContext().getDrawable(R.drawable.ic_baseline_arrow_drop_down_24).mutate();
+        ic_up.setColorFilter(iconColorFilter);
+        ic_down.setColorFilter(iconColorFilter);
 
         dbHelper = new DBHelper(requireContext().getApplicationContext());
 
@@ -191,21 +203,74 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
             }
         });
 
+        requireActivity().addMenuProvider(new MenuProvider() {
+            @SuppressLint("RestrictedApi")
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+                ((MenuBuilder) menu).setOptionalIconsVisible(true);
+                menuInflater.inflate(R.menu.sort_menu_byday, menu);
+            }
+
+            @Override
+            public void onPrepareMenu(@NonNull Menu menu) {
+                MenuProvider.super.onPrepareMenu(menu);
+                for(int i = 0; i < menu.size(); ++i) {
+                    MenuItem menuItem = menu.getItem(i);
+                    if(menuItem.getItemId() == R.id.menu_by_name) {
+                        if (lastSortMethod == ToonsAdapter.INDEX_SORT_BY_NAME) {
+                            if (descending) menuItem.setIcon(ic_down);
+                            else menuItem.setIcon(ic_up);
+                        } else menuItem.setIcon(null);
+                    }
+                    else if(menuItem.getItemId() == R.id.menu_by_id) {
+                        if (lastSortMethod == ToonsAdapter.INDEX_SORT_BY_ID) {
+                            if (descending) menuItem.setIcon(ic_down);
+                            else menuItem.setIcon(ic_up);
+                        } else menuItem.setIcon(null);
+                    }
+                }
+            }
+
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
+                boolean toReturn = false;
+                switch(menuItem.getItemId()) {
+                    case R.id.menu_by_name:
+                        if(lastSortMethod != ToonsAdapter.INDEX_SORT_BY_NAME) {
+                            lastSortMethod = ToonsAdapter.INDEX_SORT_BY_NAME;
+                            descending = false;
+                        }
+                        else descending = !descending;
+                        toReturn = true;
+                        break;
+                    case R.id.menu_by_id:
+                        if(lastSortMethod != ToonsAdapter.INDEX_SORT_BY_ID) {
+                            lastSortMethod = ToonsAdapter.INDEX_SORT_BY_ID;
+                            descending = false;
+                        }
+                        else descending = !descending;
+                        toReturn = true;
+                        break;
+                    default:
+                        break;
+                }
+                if(toReturn) loadRecyclerItemFiltered();
+                return toReturn;
+            }
+        }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if(isDebug) Log.i("DebugLog","onStart() of ByDayListFragment");
 
         binding.sBydayShowhidden.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false));
         binding.sBydayShowcompleted.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false));
-        if(isDebug) Log.i("DebugLog","SwitchCompat states of ByDayListFragment are recovered");
 
         binding.sBydayShowhidden.setOnCheckedChangeListener((cb, b) -> {
-            if(isDebug) Log.i("DebugLog","Detected change in switch show hidden of ByDayListFragment");
-
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(getString(R.string.shared_pref_showhidden_key), b);
             editor.apply();
@@ -213,30 +278,22 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
             loadRecyclerItemFiltered();
         });
         binding.sBydayShowcompleted.setOnCheckedChangeListener((cb, b) -> {
-            if(isDebug) Log.i("DebugLog","Detected change in switch show completed of ByDayListFragment");
-
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(getString(R.string.shared_pref_showcompleted_key), b);
             editor.apply();
 
             loadRecyclerItemFiltered();
         });
-        if(isDebug) Log.i("DebugLog","OnCheckedChangeListeners of ByDayListFragment is reloaded");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if(isDebug) Log.i("DebugLog","onStop() of ByDayListFragment");
-
         binding.sBydayShowhidden.setOnCheckedChangeListener(null);
         binding.sBydayShowcompleted.setOnCheckedChangeListener(null);
-        if(isDebug) Log.i("DebugLog","OnCheckedChangeListeners of ByDayListFragment are unloaded");
     }
 
     private void loadRecyclerItemFiltered() {
-        if(isDebug) Log.i("DebugLog", "day to show: " + byDayViewModel.dayToShow.getValue());
-        if(isDebug) Log.i("DebugLog", "day to show (int): " + Objects.requireNonNull(byDayViewModel.dayToShow.getValue()).getValue());
         ArrayList<ToonsContainer> containers = dbHelper.getAllToonsFiltered(
                 byDayViewModel.dayToShow.getValue(),
                 sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false),
@@ -244,7 +301,9 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
                 false,
                 false
         );
-        containers.sort(Comparator.comparing(tc -> tc.toonName));
+        if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_NAME) containers.sort(Comparator.comparing(tc -> tc.toonName));
+        else if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_ID) containers.sort(Comparator.comparing(tc -> tc.dbID));
+        if(descending) Collections.reverse(containers);
         binding.bydayRec.setAdapter(new ToonsAdapter(containers));
     }
 

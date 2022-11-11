@@ -6,9 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class LinkValidater {
-
-    private boolean isDebug;
-
     public static LinkValidater Instance;
 
     static class Info {
@@ -20,8 +17,6 @@ public class LinkValidater {
     public LinkValidater() {
         if(Instance != null) return;
         Instance = this;
-
-        isDebug = MainActivity.Instance.isDebug;
     }
 
     public boolean isLinkValidAll(String urlToParse) {
@@ -55,7 +50,6 @@ public class LinkValidater {
 
     private int extractToonId(URL aURL)  {
         String queries = aURL.getQuery();
-        if(isDebug) Log.i("DebugLog","queries: " + queries);
         if (queries == null) return -1;
         else if (queries.length() > 0) {
             int queryDividerIndex = queries.indexOf("&");

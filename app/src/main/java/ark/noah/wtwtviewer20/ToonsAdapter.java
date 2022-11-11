@@ -29,6 +29,9 @@ public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> 
 
     Drawable ic_loading, ic_error, ic_empty;
 
+    public static final int INDEX_SORT_BY_NAME = 0;
+    public static final int INDEX_SORT_BY_DAY = 1;
+    public static final int INDEX_SORT_BY_ID = 2;
 
     @SuppressLint("UseCompatLoadingForDrawables")
     @NonNull

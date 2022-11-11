@@ -3,7 +3,6 @@ package ark.noah.wtwtviewer20;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
@@ -124,8 +123,6 @@ public class BackupRestoreDBManager implements ExecutorRunner.Callback<Pair<Inte
                     //trim tabs for ease of filtering
                     line = line.replace("\t", "");
 
-                    if(currentToonsContainer.isDebug) Log.i("DebugLog", line);
-
                     //lines for toon
                     if(line.startsWith("<"+DBHelper.ID+">") && currentToonsContainer.dbID == -1)
                         currentToonsContainer.dbID = startingID++;
@@ -159,25 +156,11 @@ public class BackupRestoreDBManager implements ExecutorRunner.Callback<Pair<Inte
 
                     if(line.equals("</episode>")) {
                         ecs.add(currentEpisodesContainer);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "num: " + currentEpisodesContainer.number);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "dbid: " + currentEpisodesContainer.dbIDofToon);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "title: " + currentEpisodesContainer.title);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "date: " + currentEpisodesContainer.date);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "link: " + currentEpisodesContainer.link);
                         currentEpisodesContainer = new EpisodesContainer();
                     }
 
                     if(line.equals("</toon>")) {
                         tcs.add(currentToonsContainer);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "dbid: " + currentToonsContainer.dbID);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "title: " + currentToonsContainer.toonName);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "type: " + currentToonsContainer.toonType);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "toonid: " + currentToonsContainer.toonID);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "episodeid: " + currentToonsContainer.episodeID);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "release: " + currentToonsContainer.releaseWeekdays);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "hide: " + currentToonsContainer.hide);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "completed: " + currentToonsContainer.completed);
-                        if(currentToonsContainer.isDebug) Log.i("DebugLog", "link: " + currentToonsContainer.thumbnailURL);
                         currentToonsContainer = new ToonsContainer(startingID++, "", "", -1, -1, -1, false, false, "");
                     }
                 }

@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
-import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -33,11 +32,8 @@ import java.util.Objects;
 import ark.noah.wtwtviewer20.databinding.FragmentToonViewerBinding;
 
 public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callback<Pair<Document, Integer>> {
-
     public static final int RESULT_CODE_UNSUPPORTED_TYPE = 1;
     public static final int RESULT_CODE_NOT_AN_URL = 2;
-
-    boolean isDebug = true;
 
     FragmentToonViewerBinding binding;
 
@@ -63,7 +59,6 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
         binding = FragmentToonViewerBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
-        isDebug = MainActivity.Instance.isDebug;
         linkValidater = LinkValidater.Instance != null ? LinkValidater.Instance : new LinkValidater();
 
         Bundle receivedBundle = requireArguments();
@@ -88,7 +83,6 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
                 for (Element imgElement : element) {
                     ++count;
                     String link = imgElement.attr("src");
-                    if(isDebug) Log.i("DebugLog", link);
                     imageURLs.add(link);
                 }
                 if(count == 0)
@@ -163,7 +157,6 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
     @Override
     public void onComplete(Pair<Document, Integer> result) {
         if(result.second == 0) {
-            if(isDebug) Log.i("DebugLog", String.valueOf(imageURLs.size()));
             ArrayList<ToonViewerContainer> containers = new ArrayList<>();
             for (int i = 0; i < imageURLs.size(); ++i) {
                 ToonViewerContainer container = new ToonViewerContainer();

@@ -2,14 +2,11 @@ package ark.noah.wtwtviewer20;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
 public class ToonsContainer implements Parcelable {
-    boolean isDebug = true;
-
     public int dbID;
     public String toonName, toonType, thumbnailURL;
     public int toonID, episodeID, releaseWeekdays;
@@ -26,8 +23,6 @@ public class ToonsContainer implements Parcelable {
             boolean completed,
             String thumbnailURL
     ) {
-        isDebug = MainActivity.Instance.isDebug;
-
         this.dbID = dbID;
         this.toonName = toonName;
         this.toonType = toonType;
@@ -112,9 +107,7 @@ public class ToonsContainer implements Parcelable {
     }
 
     public String asLink() {
-        String link = LinkGetter.Instance.getEntryPoint() + toonType + 2 + "?toon=" + toonID + "&num=" + episodeID;
-        if(isDebug) Log.i("DebugLog", link);
-        return link;
+        return LinkGetter.Instance.getEntryPoint() + toonType + 2 + "?toon=" + toonID + "&num=" + episodeID;
     }
 
     public ToonsContainer getNext() {

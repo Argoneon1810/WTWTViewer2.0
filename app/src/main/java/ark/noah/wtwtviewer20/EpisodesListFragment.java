@@ -13,7 +13,6 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +41,6 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
     private ToonsContainer currentContainer;
     EpisodesListToViewerSharedViewModel sharedViewModel;
 
-    boolean isDebug = true;
-
     private ArrayList<String> links = new ArrayList<>();
     private ArrayList<String> numbers = new ArrayList<>();
     private ArrayList<String> titles = new ArrayList<>();
@@ -60,8 +57,6 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
         View view = binding.getRoot();
 
         dbHelper = new DBHelper(requireContext());
-
-        isDebug = MainActivity.Instance.isDebug;
 
         Bundle receivedBundle = requireArguments();
         currentContainer = receivedBundle.getParcelable(getString(R.string.bundle_toons));

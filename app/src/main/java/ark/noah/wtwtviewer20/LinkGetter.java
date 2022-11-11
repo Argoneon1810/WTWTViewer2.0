@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
@@ -18,8 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class LinkGetter {
-    private boolean isDebug;
-
     public static LinkGetter Instance;
 
     private SharedPreferences sharedPreferences;
@@ -35,8 +32,6 @@ public class LinkGetter {
     public LinkGetter(Context context, Callback callback) {
         if(Instance != null) return;
         Instance = this;
-
-        isDebug = MainActivity.Instance.isDebug;
 
         this.callback = callback;
 

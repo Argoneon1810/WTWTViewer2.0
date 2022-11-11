@@ -8,7 +8,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +26,6 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 
 public class ReviewEntryAdapter extends RecyclerView.Adapter<ReviewEntryAdapter.ViewHolder> {
-
     ArrayList<ToonsContainer> mList;
 
     private Drawable foreground;

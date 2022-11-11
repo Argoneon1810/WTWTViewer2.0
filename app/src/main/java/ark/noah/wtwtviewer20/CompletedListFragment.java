@@ -2,11 +2,17 @@ package ark.noah.wtwtviewer20;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.core.view.MenuProvider;
+import androidx.lifecycle.Lifecycle;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,20 +21,21 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
 
-import ark.noah.wtwtviewer20.databinding.FragmentByDayListBinding;
 import ark.noah.wtwtviewer20.databinding.FragmentCompletedListBinding;
 
 public class CompletedListFragment extends Fragment implements AddNewDialog.DialogInterface {
@@ -39,24 +46,35 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
     private DBHelper dbHelper;
     private SharedPreferences sharedPreferences;
 
+    private Drawable ic_up, ic_down;
+    BlendModeColorFilter iconColorFilter;
+
     private AddNewDialog addNewDialogFragment;
 
-    private boolean isDebug = true;
+    int lastSortMethod = 0;
+    boolean descending = false;
 
     public static CompletedListFragment newInstance() {
         return new CompletedListFragment();
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState
     ) {
-        isDebug = MainActivity.Instance.isDebug;
-
         binding = FragmentCompletedListBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
+
+        TypedValue value = new TypedValue();
+        requireContext().getTheme().resolveAttribute(android.R.attr.textColor, value, true);
+        iconColorFilter = new BlendModeColorFilter(value.data, BlendMode.SRC_ATOP);
+        ic_up = requireContext().getDrawable(R.drawable.ic_baseline_arrow_drop_up_24).mutate();
+        ic_down = requireContext().getDrawable(R.drawable.ic_baseline_arrow_drop_down_24).mutate();
+        ic_up.setColorFilter(iconColorFilter);
+        ic_down.setColorFilter(iconColorFilter);
 
         dbHelper = new DBHelper(requireContext().getApplicationContext());
         sharedPreferences = requireActivity().getApplicationContext().getSharedPreferences(getString(R.string.shared_pref_key), MODE_PRIVATE);
@@ -146,28 +164,92 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
             }
         }));
 
+        requireActivity().addMenuProvider(new MenuProvider() {
+            @SuppressLint("RestrictedApi")
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+                ((MenuBuilder) menu).setOptionalIconsVisible(true);
+                menuInflater.inflate(R.menu.sort_menu, menu);
+            }
+
+            @Override
+            public void onPrepareMenu(@NonNull Menu menu) {
+                MenuProvider.super.onPrepareMenu(menu);
+                for(int i = 0; i < menu.size(); ++i) {
+                    MenuItem menuItem = menu.getItem(i);
+                    if(menuItem.getItemId() == R.id.menu_by_name) {
+                        if (lastSortMethod == ToonsAdapter.INDEX_SORT_BY_NAME) {
+                            if (descending) menuItem.setIcon(ic_down);
+                            else menuItem.setIcon(ic_up);
+                        } else menuItem.setIcon(null);
+                    }
+                    else if(menuItem.getItemId() == R.id.menu_by_day) {
+                        if (lastSortMethod == ToonsAdapter.INDEX_SORT_BY_DAY) {
+                            if (descending) menuItem.setIcon(ic_down);
+                            else menuItem.setIcon(ic_up);
+                        } else menuItem.setIcon(null);
+                    }
+                    else if(menuItem.getItemId() == R.id.menu_by_id) {
+                        if (lastSortMethod == ToonsAdapter.INDEX_SORT_BY_ID) {
+                            if (descending) menuItem.setIcon(ic_down);
+                            else menuItem.setIcon(ic_up);
+                        } else menuItem.setIcon(null);
+                    }
+                }
+            }
+
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
+                boolean toReturn = false;
+                switch(menuItem.getItemId()) {
+                    case R.id.menu_by_name:
+                        if(lastSortMethod != ToonsAdapter.INDEX_SORT_BY_NAME) {
+                            lastSortMethod = ToonsAdapter.INDEX_SORT_BY_NAME;
+                            descending = false;
+                        }
+                        else descending = !descending;
+                        toReturn = true;
+                        break;
+                    case R.id.menu_by_day:
+                        if(lastSortMethod != ToonsAdapter.INDEX_SORT_BY_DAY) {
+                            lastSortMethod = ToonsAdapter.INDEX_SORT_BY_DAY;
+                            descending = false;
+                        }
+                        else descending = !descending;
+                        toReturn = true;
+                        break;
+                    case R.id.menu_by_id:
+                        if(lastSortMethod != ToonsAdapter.INDEX_SORT_BY_ID) {
+                            lastSortMethod = ToonsAdapter.INDEX_SORT_BY_ID;
+                            descending = false;
+                        }
+                        else descending = !descending;
+                        toReturn = true;
+                        break;
+                    default:
+                        break;
+                }
+                if(toReturn) loadRecyclerItemFiltered();
+                return toReturn;
+            }
+        }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if(isDebug) Log.i("DebugLog","onStart() of CompletedListFragment");
-
         binding.sCompletedShowhidden.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false));
-        if(isDebug) Log.i("DebugLog","SwitchCompat state of CompletedListFragment is recovered");
 
         binding.sCompletedShowhidden.setOnCheckedChangeListener(this::onCheckedChangedShowHidden);
-        if(isDebug) Log.i("DebugLog","OnCheckedChangeListener of CompletedListFragment is reloaded");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if(isDebug) Log.i("DebugLog","onStop() of ByDayListFragment");
-
         binding.sCompletedShowhidden.setOnCheckedChangeListener(null);
-        if(isDebug) Log.i("DebugLog","OnCheckedChangeListener of CompletedListFragment is unloaded");
     }
 
     private void loadRecyclerItemFiltered() {
@@ -178,13 +260,14 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
                 false,
                 true
         );
-        containers.sort(Comparator.comparing(tc -> tc.toonName));
+        if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_NAME) containers.sort(Comparator.comparing(tc -> tc.toonName));
+        else if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_DAY) containers.sort(Comparator.comparing(tc -> tc.releaseWeekdays));
+        else if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_ID) containers.sort(Comparator.comparing(tc -> tc.dbID));
+        if(descending) Collections.reverse(containers);
         binding.completedRec.setAdapter(new ToonsAdapter(containers));
     }
 
     private void onCheckedChangedShowHidden(CompoundButton cb, boolean b) {
-        if(isDebug) Log.i("DebugLog","Detected change in switch show hidden of CompletedListFragment");
-
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(getString(R.string.shared_pref_showhidden_key), b);
         editor.apply();

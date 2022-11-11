@@ -85,4 +85,7 @@
     <string name="frag_title_wait">로딩중</string>
     <string name="txt_pls_wait_episodes">앱이 웹에서 에피소드 리스트를 가져오는 동안 잠시만 기다려 주십시오</string>
     <string name="txt_pirate">해적의 해적</string>
+    <string name="menu_by_day">출시순</string>
+    <string name="menu_by_id">등록순</string>
+    <string name="menu_by_name">제목순</string>
 </resources>
