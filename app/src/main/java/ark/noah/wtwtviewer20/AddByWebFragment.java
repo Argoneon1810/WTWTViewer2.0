@@ -28,7 +28,7 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
     private FragmentAddByWebBinding binding;
 
     private String entryPoint;
-    private String currentlyVisibleUrlInString;
+    private String currentlyVisibleUrlInString = "";
 
     private LinkValidater linkValidater;
 
@@ -38,7 +38,7 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
         return new AddByWebFragment();
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -54,7 +54,7 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
 
         LinkGetter linkGetter = LinkGetter.Instance;
         if(linkGetter != null)
-            if(linkGetter.isReady())
+            if (linkGetter.isReady())
                 entryPoint = linkGetter.getEntryPoint();
 
         new ExecutorRunner().execute(() -> {
@@ -82,14 +82,23 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
     @Override
     public void onComplete(Document result) {
         if(result == null) return;
+        if(binding == null) return;
 
-        binding.webView.loadDataWithBaseURL(entryPoint, result.toString(), "text/html", "utf-8", "");
-        currentlyVisibleUrlInString = result.location();
+        result.getElementsByClass("banner").remove();
+        result.getElementsByTag("center").remove();
+        result.getElementsByClass("btn_bookmark").remove();
 
-        if(linkValidater.isLinkValidEpisodeList(currentlyVisibleUrlInString))
-            binding.btnWebAddthispage.setVisibility(View.VISIBLE);
-        else
-            binding.btnWebAddthispage.setVisibility(View.GONE);
+        try {
+            binding.webView.loadDataWithBaseURL(entryPoint, result.toString(), "text/html", "utf-8", currentlyVisibleUrlInString);
+            currentlyVisibleUrlInString = result.location();
+
+            if(linkValidater.isLinkValidEpisodeList(currentlyVisibleUrlInString))
+                binding.btnWebAddthispage.setVisibility(View.VISIBLE);
+            else
+                binding.btnWebAddthispage.setVisibility(View.GONE);
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

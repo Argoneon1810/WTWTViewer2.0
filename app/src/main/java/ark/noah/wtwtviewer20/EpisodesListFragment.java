@@ -97,15 +97,9 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
         if(descending) Collections.reverse(mData);
         EpisodesAdapter adapter = new EpisodesAdapter(mData, currentContainer, this::onClick, this);
         binding.recEpisodes.setAdapter(adapter);
-        RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(requireContext()) {
-            @Override
-            protected int getVerticalSnapPreference() {
-                return LinearSmoothScroller.SNAP_TO_START;
-            }
-        };
-        smoothScroller.setTargetPosition(currentContainer.episodeID-1);
-        binding.recEpisodes.scrollToPosition(getPreScrollIndex(currentContainer.episodeID-1, getCenterViewingIndex(binding.recEpisodes)));
-        Objects.requireNonNull(binding.recEpisodes.getLayoutManager()).startSmoothScroll(smoothScroller);
+        int rawIndex = adapter.getPositionOfEpisode(currentContainer.episodeID);
+        binding.recEpisodes.scrollToPosition(getPreScrollIndex(rawIndex, getCenterViewingIndex(binding.recEpisodes)));
+        binding.recEpisodes.smoothScrollToPosition(rawIndex);
 
         episodesListToViewerSharedViewModel = new ViewModelProvider(requireActivity()).get(EpisodesListToViewerSharedViewModel.class);
         episodesListToViewerSharedViewModel.dataToShare.observe(getViewLifecycleOwner(), o -> {
@@ -151,13 +145,16 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
                 if(menuItem.getItemId() == R.id.menu_sort) {
                     descending = !descending;
                     mainListAndEpisodesListSortViewModel.sortDescEpisodes.setValue(descending);
+
                     ArrayList<EpisodesContainer> containers = adapter.getEditableMData();
                     containers.sort(Comparator.comparing((ec) -> ec.number));
                     if(descending) Collections.reverse(containers);
                     adapter.replaceAllData(containers);
+
                     int targetPos = adapter.getPositionOfEpisode(currentContainer.episodeID);
                     binding.recEpisodes.scrollToPosition(getPreScrollIndex(targetPos, getCenterViewingIndex(binding.recEpisodes)));
                     binding.recEpisodes.smoothScrollToPosition(targetPos);
+
                     return true;
                 }
                 return false;
@@ -192,6 +189,8 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
 
     @Override
     public void onComplete(Document result) {
+        if(binding == null) return;
+
         try {
             ArrayList<EpisodesContainer> containers = new ArrayList<>();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getString(R.string.date_format));

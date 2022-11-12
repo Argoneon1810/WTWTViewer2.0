@@ -101,7 +101,7 @@ public class EpisodesAdapter extends RecyclerView.Adapter<EpisodesAdapter.ViewHo
         for(int i = 0; i < mData.size(); ++i)
             if(mData.get(i).number == episodeID)
                 return i;
-        return -1;
+        return 0;
     }
 
     @Override

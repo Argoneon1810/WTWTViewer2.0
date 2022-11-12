@@ -1,5 +1,7 @@
 package ark.noah.wtwtviewer20;
 
+import android.util.Log;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -35,8 +37,10 @@ public class LinkValidater {
             info.toonType = extractToonType(aURL);
             info.toonID = extractToonId(aURL);
             info.episodeID = extractEpisodeID(aURL);
-            if(!info.toonType.equals(""))
+            if(!info.toonType.equals("") && !info.toonType.equals("/")) {
+                Log.i("DebugLog","info.toonType: " + info.toonType);
                 info.toonType = info.toonType.substring(0, 2);
+            }
             return info;
         } catch (MalformedURLException | NumberFormatException e) {
             e.printStackTrace();

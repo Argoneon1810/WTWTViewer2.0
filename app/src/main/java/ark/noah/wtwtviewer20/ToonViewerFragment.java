@@ -185,20 +185,25 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
 
     @Override
     public void onComplete(Pair<Document, Integer> result) {
-        if(result.second == 0) {
-            ArrayList<ToonViewerContainer> containers = new ArrayList<>();
-            for (int i = 0; i < imageURLs.size(); ++i) {
-                ToonViewerContainer container = new ToonViewerContainer();
-                container.imageURL = imageURLs.get(i);
-                containers.add(container);
+        if(binding == null) return;
+        try {
+            if(result.second == 0) {
+                ArrayList<ToonViewerContainer> containers = new ArrayList<>();
+                for (int i = 0; i < imageURLs.size(); ++i) {
+                    ToonViewerContainer container = new ToonViewerContainer();
+                    container.imageURL = imageURLs.get(i);
+                    containers.add(container);
+                }
+                binding.listViewer.setAdapter(new ToonViewerAdapter(containers, requireContext()));
+                sharedViewModel.dataToShare.setValue(currentContainer);
             }
-            binding.listViewer.setAdapter(new ToonViewerAdapter(containers, requireContext()));
-            sharedViewModel.dataToShare.setValue(currentContainer);
+            else if(result.second == RESULT_CODE_UNSUPPORTED_TYPE)
+                goBackWithToast(getString(R.string.txt_unsupported_toon));
+            else if(result.second == RESULT_CODE_NOT_AN_URL)
+                goBackWithToast(getString(R.string.txt_invalid_episode_id));
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
-        else if(result.second == RESULT_CODE_UNSUPPORTED_TYPE)
-            goBackWithToast(getString(R.string.txt_unsupported_toon));
-        else if(result.second == RESULT_CODE_NOT_AN_URL)
-            goBackWithToast(getString(R.string.txt_invalid_episode_id));
     }
 
     @Override
