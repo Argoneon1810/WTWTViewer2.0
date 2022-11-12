@@ -18,6 +18,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
@@ -51,6 +52,7 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
 
     private AddNewDialog addNewDialogFragment;
 
+    private MainListAndEpisodesListSortViewModel mainListAndEpisodesListSortViewModel;
     int lastSortMethod = 0;
     boolean descending = false;
 
@@ -80,6 +82,23 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
         sharedPreferences = requireActivity().getApplicationContext().getSharedPreferences(getString(R.string.shared_pref_key), MODE_PRIVATE);
 
         binding.sCompletedShowhidden.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false));
+
+        mainListAndEpisodesListSortViewModel = new ViewModelProvider(requireActivity()).get(MainListAndEpisodesListSortViewModel.class);
+        Boolean sortDescMain = mainListAndEpisodesListSortViewModel.sortDescMain.getValue();
+        if(sortDescMain != null) descending = sortDescMain;
+        mainListAndEpisodesListSortViewModel.sortDescMain.observe(getViewLifecycleOwner(), o -> {
+            Boolean result = mainListAndEpisodesListSortViewModel.sortDescMain.getValue();
+            if(result == null) return;
+            if(result != descending) descending = result;
+        });
+        Integer sortMain = mainListAndEpisodesListSortViewModel.sortMain.getValue();
+        if(sortMain != null) lastSortMethod = sortMain;
+        mainListAndEpisodesListSortViewModel.sortMain.observe(getViewLifecycleOwner(), o -> {
+            Integer result = mainListAndEpisodesListSortViewModel.sortMain.getValue();
+            if(result == null) return;
+            if(result != lastSortMethod)
+                lastSortMethod = result;
+        });
 
         loadRecyclerItemFiltered();
 
@@ -207,24 +226,30 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
                         if(lastSortMethod != ToonsAdapter.INDEX_SORT_BY_NAME) {
                             lastSortMethod = ToonsAdapter.INDEX_SORT_BY_NAME;
                             descending = false;
+                            mainListAndEpisodesListSortViewModel.sortMain.setValue(lastSortMethod);
                         }
                         else descending = !descending;
+                        mainListAndEpisodesListSortViewModel.sortDescMain.setValue(descending);
                         toReturn = true;
                         break;
                     case R.id.menu_by_day:
                         if(lastSortMethod != ToonsAdapter.INDEX_SORT_BY_DAY) {
                             lastSortMethod = ToonsAdapter.INDEX_SORT_BY_DAY;
                             descending = false;
+                            mainListAndEpisodesListSortViewModel.sortMain.setValue(lastSortMethod);
                         }
                         else descending = !descending;
+                        mainListAndEpisodesListSortViewModel.sortDescMain.setValue(descending);
                         toReturn = true;
                         break;
                     case R.id.menu_by_id:
                         if(lastSortMethod != ToonsAdapter.INDEX_SORT_BY_ID) {
                             lastSortMethod = ToonsAdapter.INDEX_SORT_BY_ID;
                             descending = false;
+                            mainListAndEpisodesListSortViewModel.sortMain.setValue(lastSortMethod);
                         }
                         else descending = !descending;
+                        mainListAndEpisodesListSortViewModel.sortDescMain.setValue(descending);
                         toReturn = true;
                         break;
                     default:

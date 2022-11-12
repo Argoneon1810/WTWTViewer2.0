@@ -47,7 +47,8 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
     private DBHelper dbHelper;
 
     private ToonsContainer currentContainer;
-    EpisodesListToViewerSharedViewModel sharedViewModel;
+    EpisodesListToViewerSharedViewModel episodesListToViewerSharedViewModel;
+    MainListAndEpisodesListSortViewModel mainListAndEpisodesListSortViewModel;
 
     private ArrayList<String> links = new ArrayList<>();
     private ArrayList<String> numbers = new ArrayList<>();
@@ -77,6 +78,16 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
             startActivity(browserIntent);
         }
 
+        mainListAndEpisodesListSortViewModel = new ViewModelProvider(requireActivity()).get(MainListAndEpisodesListSortViewModel.class);
+        Boolean sortDescEpisodes = mainListAndEpisodesListSortViewModel.sortDescEpisodes.getValue();
+        if(sortDescEpisodes != null) descending = sortDescEpisodes;
+        mainListAndEpisodesListSortViewModel.sortDescEpisodes.observe(getViewLifecycleOwner(), o -> {
+            Boolean result = mainListAndEpisodesListSortViewModel.sortDescEpisodes.getValue();
+            if(result == null) return;
+            if(result != descending)
+                descending = result;
+        });
+
         ArrayList<EpisodesContainer> mData = dbHelper.getAllEpisodes(currentContainer);
         if(mData.size() == 0) binding.tvRecEpisodesWait.setVisibility(View.VISIBLE);
         else {
@@ -96,8 +107,8 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
         binding.recEpisodes.scrollToPosition(getPreScrollIndex(currentContainer.episodeID-1, getCenterViewingIndex(binding.recEpisodes)));
         Objects.requireNonNull(binding.recEpisodes.getLayoutManager()).startSmoothScroll(smoothScroller);
 
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(EpisodesListToViewerSharedViewModel.class);
-        sharedViewModel.dataToShare.observe(getViewLifecycleOwner(), o -> {
+        episodesListToViewerSharedViewModel = new ViewModelProvider(requireActivity()).get(EpisodesListToViewerSharedViewModel.class);
+        episodesListToViewerSharedViewModel.dataToShare.observe(getViewLifecycleOwner(), o -> {
             if(!o.isSameToon(currentContainer)) return;
             if(o.equals(currentContainer)) return;
             adapter.updateCurrentToon(o);
@@ -139,6 +150,7 @@ public class EpisodesListFragment extends Fragment implements ExecutorRunner.Cal
             public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
                 if(menuItem.getItemId() == R.id.menu_sort) {
                     descending = !descending;
+                    mainListAndEpisodesListSortViewModel.sortDescEpisodes.setValue(descending);
                     ArrayList<EpisodesContainer> containers = adapter.getEditableMData();
                     containers.sort(Comparator.comparing((ec) -> ec.number));
                     if(descending) Collections.reverse(containers);
