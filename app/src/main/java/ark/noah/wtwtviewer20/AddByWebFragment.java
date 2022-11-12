@@ -82,7 +82,6 @@ public class AddByWebFragment extends Fragment implements ExecutorRunner.Callbac
     @Override
     public void onComplete(Document result) {
         if(result == null) return;
-        if(binding == null) return;
 
         binding.webView.loadDataWithBaseURL(entryPoint, result.toString(), "text/html", "utf-8", "");
         currentlyVisibleUrlInString = result.location();
