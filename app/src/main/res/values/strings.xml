@@ -32,9 +32,20 @@
     <string name="day_sat_short">SAT</string>
     <string name="day_unspecified">NON</string>
 
+    <string name="pref_btn_key_restore_old" translatable="false">btn_restore_old</string>
+    <string name="pref_btn_key_rebuild_thumbnail" translatable="false">btn_rebuild_thumbnail</string>
+
+    <string name="pref_key_root" translatable="false">prefwtwt</string>
+    <string name="pref_key_entrypoint" translatable="false">entrypoint</string>
     <string name="pref_cat_entrypoints">entry point</string>
     <string name="pref_desc_entrypoints">Please select an entrypoint to load toons.</string>
+    <string name="pref_key_default_sorting_cat" translatable="false">defaultSortingCat</string>
+    <string name="pref_key_default_sorting_dir" translatable="false">defaultSortingDir</string>
+
     <string name="pref_cat_backup_restore">Backup and Restore</string>
+    <string name="pref_key_btn_backup" translatable="false">btn_backup</string>
+    <string name="pref_key_btn_restore" translatable="false">btn_restore</string>
+    <string name="pref_key_btn_clear_all" translatable="false">btn_clear_all</string>
     <string name="pref_btn_backup">Backup</string>
     <string name="pref_btn_restore">Restore</string>
     <string name="pref_btn_clear">Clear All</string>
@@ -43,15 +54,6 @@
     <string name="btn_restore_old">Restore Old DB</string>
     <string name="pref_cat_rebuild_thumbnail">Rebuild Thumnail</string>
     <string name="btn_rebuild_thumbnail">Reload all thumnail again</string>
-
-    <string name="pref_btn_key_restore_old" translatable="false">btn_restore_old</string>
-    <string name="pref_btn_key_rebuild_thumbnail" translatable="false">btn_rebuild_thumbnail</string>
-
-    <string name="pref_key_root" translatable="false">prefwtwt</string>
-    <string name="pref_key_entrypoint" translatable="false">entrypoint</string>
-    <string name="pref_key_btn_backup" translatable="false">btn_backup</string>
-    <string name="pref_key_btn_restore" translatable="false">btn_restore</string>
-    <string name="pref_key_btn_clear_all" translatable="false">btn_clear_all</string>
 
     <string name="shared_pref_key" translatable="false">sharedprefwtwt</string>
     <string name="shared_pref_showhidden_key" translatable="false">showhidden</string>
@@ -113,4 +115,9 @@
 
     <string name="txt_pls_wait_episodes">Please wait shortly while app is getting a list of episodes from web</string>
     <string name="txt_pirate">Pirate of a pirate</string>
+    <string name="pref_desc_default_sorting_cat">Please select a default sorting method</string>
+    <string name="pref_cat_default_sorting">Default Sorting Method</string>
+    <string name="pref_desc_default_sorting_dir">Please select a default sorting direction</string>
+    <string name="pref_array_default_sorting_dir_default_value">Ascending</string>
+    <string name="pref_array_default_sorting_cat_default_value">By Name</string>
 </resources>

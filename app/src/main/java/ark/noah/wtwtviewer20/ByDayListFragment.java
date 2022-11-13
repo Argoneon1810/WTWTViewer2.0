@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.TypedValue;
@@ -95,8 +96,8 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         ic_down.setColorFilter(iconColorFilter);
 
         dbHelper = new DBHelper(requireContext().getApplicationContext());
-
         sharedPreferences = requireActivity().getApplicationContext().getSharedPreferences(getString(R.string.shared_pref_key), MODE_PRIVATE);
+        SharedPreferences settingPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext());
 
         binding.sBydayShowhidden.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false));
         binding.sBydayShowcompleted.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false));
@@ -104,13 +105,25 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         mainListAndEpisodesListSortViewModel = new ViewModelProvider(requireActivity()).get(MainListAndEpisodesListSortViewModel.class);
         Boolean sortDescMain = mainListAndEpisodesListSortViewModel.sortDescMain.getValue();
         if(sortDescMain != null) descending = sortDescMain;
+        else descending = settingPreferences.getString(
+                    getString(R.string.pref_key_default_sorting_dir),                   //selected value
+                    getResources().getStringArray(R.array.default_sorting_dir)[1]       //if non, use default value
+            ).equals(getResources().getStringArray(R.array.default_sorting_dir)[1]);
         mainListAndEpisodesListSortViewModel.sortDescMain.observe(getViewLifecycleOwner(), o -> {
             Boolean result = mainListAndEpisodesListSortViewModel.sortDescMain.getValue();
             if(result == null) return;
             if(result != descending) descending = result;
         });
         Integer sortMain = mainListAndEpisodesListSortViewModel.sortMain.getValue();
-        if(sortMain != null) lastSortMethod = sortMain;
+        if(sortMain != null)
+            if(sortMain == ToonsAdapter.INDEX_SORT_BY_DAY)
+                lastSortMethod = ToonsAdapter.INDEX_SORT_BY_NAME;
+            else
+                lastSortMethod = sortMain;
+        else lastSortMethod = getSortingMethod(settingPreferences.getString(
+                    getString(R.string.pref_key_default_sorting_cat),                   //selected value
+                    getResources().getStringArray(R.array.default_sorting_cat)[0]       //if non, use default value
+            ));
         mainListAndEpisodesListSortViewModel.sortMain.observe(getViewLifecycleOwner(), o -> {
             Integer result = mainListAndEpisodesListSortViewModel.sortMain.getValue();
             if(result == null) return;
@@ -327,6 +340,15 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
         else if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_ID) containers.sort(Comparator.comparing(tc -> tc.dbID));
         if(descending) Collections.reverse(containers);
         binding.bydayRec.setAdapter(new ToonsAdapter(containers));
+    }
+
+    private int getSortingMethod(String value) {
+        if(value.equals(getResources().getStringArray(R.array.default_sorting_cat)[2]))
+            return ToonsAdapter.INDEX_SORT_BY_ID;
+        else /*if(value.equals(getResources().getStringArray(R.array.default_sorting_cat)[1]))
+            return ToonsAdapter.INDEX_SORT_BY_DAY;
+        else if(value.equals(getResources().getStringArray(R.array.default_sorting_cat)[0]))*/
+            return ToonsAdapter.INDEX_SORT_BY_NAME;
     }
 
     private void assignButtonListeners() {

@@ -21,7 +21,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.preference.PreferenceManager;
 
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -85,6 +87,7 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
 
         dbHelper = new DBHelper(requireContext().getApplicationContext());
         sharedPreferences = requireActivity().getApplicationContext().getSharedPreferences(getString(R.string.shared_pref_key), MODE_PRIVATE);
+        SharedPreferences settingPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext());
 
         binding.sAlllistShowhidden.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false));
         binding.sAlllistShowcompleted.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false));
@@ -92,6 +95,10 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         mainListAndEpisodesListSortViewModel = new ViewModelProvider(requireActivity()).get(MainListAndEpisodesListSortViewModel.class);
         Boolean sortDescMain = mainListAndEpisodesListSortViewModel.sortDescMain.getValue();
         if(sortDescMain != null) descending = sortDescMain;
+        else descending = settingPreferences.getString(
+                    getString(R.string.pref_key_default_sorting_dir),                   //selected value
+                    getResources().getStringArray(R.array.default_sorting_dir)[1]       //if non, use default value
+            ).equals(getResources().getStringArray(R.array.default_sorting_dir)[1]);
         mainListAndEpisodesListSortViewModel.sortDescMain.observe(getViewLifecycleOwner(), o -> {
             Boolean result = mainListAndEpisodesListSortViewModel.sortDescMain.getValue();
             if(result == null) return;
@@ -99,6 +106,10 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         });
         Integer sortMain = mainListAndEpisodesListSortViewModel.sortMain.getValue();
         if(sortMain != null) lastSortMethod = sortMain;
+        else lastSortMethod = getSortingMethod(settingPreferences.getString(
+                    getString(R.string.pref_key_default_sorting_cat),                   //selected value
+                    getResources().getStringArray(R.array.default_sorting_cat)[0]       //if non, use default value
+            ));
         mainListAndEpisodesListSortViewModel.sortMain.observe(getViewLifecycleOwner(), o -> {
             Integer result = mainListAndEpisodesListSortViewModel.sortMain.getValue();
             if(result == null) return;
@@ -275,8 +286,20 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         binding.sAlllistShowhidden.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showhidden_key), false));
         binding.sAlllistShowcompleted.setChecked(sharedPreferences.getBoolean(getString(R.string.shared_pref_showcompleted_key), false));
 
-        binding.sAlllistShowhidden.setOnCheckedChangeListener(this::onCheckedChangedShowHidden);
-        binding.sAlllistShowcompleted.setOnCheckedChangeListener(this::onCheckedChangedShowCompleted);
+        binding.sAlllistShowhidden.setOnCheckedChangeListener((cb, b) -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(getString(R.string.shared_pref_showhidden_key), b);
+            editor.apply();
+
+            loadRecyclerItemFiltered();
+        });
+        binding.sAlllistShowcompleted.setOnCheckedChangeListener((cb, b) -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(getString(R.string.shared_pref_showcompleted_key), b);
+            editor.apply();
+
+            loadRecyclerItemFiltered();
+        });
     }
 
     @Override
@@ -301,20 +324,13 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         binding.alllistRec.setAdapter(new ToonsAdapter(containers));
     }
 
-    private void onCheckedChangedShowHidden(CompoundButton cb, boolean b) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.shared_pref_showhidden_key), b);
-        editor.apply();
-
-        loadRecyclerItemFiltered();
-    }
-
-    private void onCheckedChangedShowCompleted(CompoundButton cb, boolean b) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.shared_pref_showcompleted_key), b);
-        editor.apply();
-
-        loadRecyclerItemFiltered();
+    private int getSortingMethod(String value) {
+        if(value.equals(getResources().getStringArray(R.array.default_sorting_cat)[0]))
+            return ToonsAdapter.INDEX_SORT_BY_NAME;
+        else if(value.equals(getResources().getStringArray(R.array.default_sorting_cat)[1]))
+            return ToonsAdapter.INDEX_SORT_BY_DAY;
+        else /*if(value.equals(getResources().getStringArray(R.array.default_sorting_cat)[2]))*/
+            return ToonsAdapter.INDEX_SORT_BY_ID;
     }
 
     @Override

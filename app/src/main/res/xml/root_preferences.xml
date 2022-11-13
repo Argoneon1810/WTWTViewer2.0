@@ -6,9 +6,9 @@
         android:title="@string/pref_cat_entrypoints">
         <ListPreference
             android:key="@string/pref_key_entrypoint"
+            android:title="@string/pref_desc_entrypoints"
             android:entries="@array/entry_points"
             android:entryValues="@array/entry_points"
-            android:title="@string/pref_desc_entrypoints"
             app:defaultValue="https://nicelink6.com/"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
@@ -37,6 +37,25 @@
         <Preference
             android:key="@string/pref_btn_key_rebuild_thumbnail"
             android:title="@string/btn_rebuild_thumbnail" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/pref_cat_default_sorting" >
+
+        <ListPreference
+            android:key="@string/pref_key_default_sorting_cat"
+            android:title="@string/pref_desc_default_sorting_cat"
+            android:entries="@array/default_sorting_cat"
+            android:entryValues="@array/default_sorting_cat"
+            app:defaultValue="@string/pref_array_default_sorting_cat_default_value"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:key="@string/pref_key_default_sorting_dir"
+            android:title="@string/pref_desc_default_sorting_dir"
+            android:entries="@array/default_sorting_dir"
+            android:entryValues="@array/default_sorting_dir"
+            app:defaultValue="@string/pref_array_default_sorting_dir_default_value"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>

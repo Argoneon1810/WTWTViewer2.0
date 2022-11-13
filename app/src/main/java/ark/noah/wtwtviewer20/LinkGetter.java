@@ -60,8 +60,8 @@ public class LinkGetter {
         try {
             doc = Jsoup.connect(
                     sharedPreferences.getString(
-                            pref_key_entrypoint,
-                            resources.getStringArray(R.array.entry_points)[5]   //default value
+                            pref_key_entrypoint,                                //selected value
+                            resources.getStringArray(R.array.entry_points)[5]   //if non, use default value
                     )
             ).get();
 

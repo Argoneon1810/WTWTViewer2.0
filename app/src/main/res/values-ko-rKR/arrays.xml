@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="entry_points">
         <item name="1">https://nicelink1.com/</item>
@@ -12,12 +13,12 @@
         <item name="10">https://nicelink10.com/</item>
     </string-array>
     <string-array name="default_sorting_cat">
-        <item name="1">By Name</item>
-        <item name="2">By Day</item>
-        <item name="3">By ID</item>
+        <item name="1">제목순</item>
+        <item name="2">출시순</item>
+        <item name="3">등록순</item>
     </string-array>
     <string-array name="default_sorting_dir">
-        <item name="1">Ascending</item>
-        <item name="2">Descending</item>
+        <item name="1">오름차순</item>
+        <item name="2">내림차순</item>
     </string-array>
 </resources>

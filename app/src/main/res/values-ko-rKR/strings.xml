@@ -91,4 +91,9 @@
 
     <string name="txt_pls_wait_episodes">앱이 웹에서 에피소드 리스트를 가져오는 동안 잠시만 기다려 주십시오</string>
     <string name="txt_pirate">해적의 해적</string>
+    <string name="pref_cat_default_sorting">기본 정렬 규칙</string>
+    <string name="pref_desc_default_sorting_cat">기본 정렬 규칙을 설정해 주세요</string>
+    <string name="pref_desc_default_sorting_dir">기본 정렬 방향을 설정해 주세요</string>
+    <string name="pref_array_default_sorting_dir_default_value">오름차순</string>
+    <string name="pref_array_default_sorting_cat_default_value">제목순</string>
 </resources>
