@@ -87,12 +87,12 @@
     <fragment
         android:id="@+id/addByWebFragment"
         android:name="ark.noah.wtwtviewer20.AddByWebFragment"
-        android:label="fragment_add_by_web"
-        tools:layout="@layout/fragment_add_by_web" >
+        android:label="@string/frag_title_add_by_web"
+        tools:layout="@layout/fragment_add_by_web">
         <argument
             android:name="from"
-            app:argType="integer"
-            android:defaultValue="-1" />
+            android:defaultValue="-1"
+            app:argType="integer" />
         <action
             android:id="@+id/action_addByWebFragment_to_reviewEntryFragment4"
             app:destination="@id/reviewEntryFragment"

@@ -2,6 +2,7 @@ package ark.noah.wtwtviewer20;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
 import android.graphics.drawable.Drawable;
@@ -12,12 +13,19 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ToonViewerAdapter extends BaseAdapter {
     ArrayList<ToonViewerContainer> mData;
+    ArrayList<Bitmap> imageData;
     LayoutInflater mLayoutInflater;
 
     Drawable ic_loading, ic_error, ic_empty;
@@ -25,6 +33,7 @@ public class ToonViewerAdapter extends BaseAdapter {
     @SuppressLint("UseCompatLoadingForDrawables")
     ToonViewerAdapter(ArrayList<ToonViewerContainer> list, Context context) {
         mData = list;
+        imageData = new ArrayList<>(Arrays.asList(new Bitmap[list.size()]));
         mLayoutInflater = LayoutInflater.from(context);
 
         ic_loading = context.getDrawable(R.drawable.ic_baseline_downloading_24);
@@ -70,12 +79,22 @@ public class ToonViewerAdapter extends BaseAdapter {
         }
 
         if(mData.get(position).loadedImageBitmap == null) {
-            Glide.with(viewHolder.imageView)
-                    .load(mData.get(position).imageURL)
-                    .placeholder(ic_loading)
-                    .error(ic_error)
-                    .fallback(ic_empty)
-                    .into(viewHolder.imageView);
+            Glide.with(view.getContext())
+                 .asBitmap()
+                 .load(mData.get(position).imageURL)
+                 .placeholder(ic_loading)
+                 .error(ic_error)
+                 .fallback(ic_empty)
+                 .into(new CustomTarget<Bitmap>() {
+                     @Override
+                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                         mData.get(position).loadedImageBitmap = resource;
+                         viewHolder.imageView.setImageBitmap(resource);
+                     }
+                     @Override
+                     public void onLoadCleared(@Nullable Drawable placeholder) { }
+                 }
+            );
         } else {
             viewHolder.imageView.setImageBitmap(mData.get(position).loadedImageBitmap);
         }

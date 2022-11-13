@@ -1,7 +1,6 @@
 package ark.noah.wtwtviewer20;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.core.view.MenuProvider;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
@@ -35,8 +34,6 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Objects;
 
 import ark.noah.wtwtviewer20.databinding.FragmentToonViewerBinding;
@@ -167,20 +164,22 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
         Navigation.findNavController(requireView()).navigate(R.id.action_toonViewerFragment_to_episodesListFragment, bundle);
     }
 
-    private void hideToolBar() {
+    private void hideToolBarAndNavigator() {
         Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).hide();
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) binding.viewerRoot.getLayoutParams();
         oldMargin = lp.topMargin;
         lp.topMargin = 0;
         binding.viewerRoot.setLayoutParams(lp);
+        binding.viewerNavigator.setVisibility(View.INVISIBLE);
     }
 
-    private void showToolBar() {
+    private void showToolBarAndNavigator() {
         Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).show();
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) binding.viewerRoot.getLayoutParams();
         lp.topMargin = oldMargin;
         oldMargin = 0;
         binding.viewerRoot.setLayoutParams(lp);
+        binding.viewerNavigator.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -213,7 +212,7 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
     @Override
     public void onStop() {
         super.onStop();
-        showToolBar();
+        showToolBarAndNavigator();
     }
 
     class ViewerListGetureListener extends GestureDetector.SimpleOnGestureListener {
@@ -221,12 +220,10 @@ public class ToonViewerFragment extends Fragment implements ExecutorRunner.Callb
         public boolean onSingleTapUp(MotionEvent e) {
             if(showNavigator) {
                 showNavigator = false;
-                hideToolBar();
-                binding.viewerNavigator.setVisibility(View.INVISIBLE);
+                hideToolBarAndNavigator();
             } else {
                 showNavigator = true;
-                showToolBar();
-                binding.viewerNavigator.setVisibility(View.VISIBLE);
+                showToolBarAndNavigator();
             }
             return super.onSingleTapUp(e);
         }
