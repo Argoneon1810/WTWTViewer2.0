@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.SearchView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +41,7 @@ import java.util.Objects;
 
 import ark.noah.wtwtviewer20.databinding.FragmentCompletedListBinding;
 
-public class CompletedListFragment extends Fragment implements AddNewDialog.DialogInterface {
+public class CompletedListFragment extends Fragment implements AddNewDialog.DialogInterface, ToonsAdapter.ToonsAdapterFilterResultNotifier {
     public static final int INDEX = 2;
 
     private FragmentCompletedListBinding binding;
@@ -199,6 +200,22 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
             public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
                 ((MenuBuilder) menu).setOptionalIconsVisible(true);
                 menuInflater.inflate(R.menu.sort, menu);
+                MenuItem searchMenuItem = menu.findItem(R.id.search);
+                SearchView searchView = (SearchView) searchMenuItem.getActionView();
+                searchView.setQueryHint(getString(R.string.txt_search));
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String query) {
+                        ToonsAdapter adapter = (ToonsAdapter) binding.completedRec.getAdapter();
+                        Objects.requireNonNull(adapter).getFilter().filter(query);
+                        return false;
+                    }
+                });
             }
 
             @Override
@@ -299,7 +316,9 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
         else if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_DAY) containers.sort(Comparator.comparing(tc -> tc.releaseWeekdays));
         else if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_ID) containers.sort(Comparator.comparing(tc -> tc.dbID));
         if(descending) Collections.reverse(containers);
-        binding.completedRec.setAdapter(new ToonsAdapter(containers));
+        ToonsAdapter adapter = new ToonsAdapter(containers);
+        adapter.assignNotifier(this);
+        binding.completedRec.setAdapter(adapter);
     }
 
     private int getSortingMethod(String value) {
@@ -334,5 +353,13 @@ public class CompletedListFragment extends Fragment implements AddNewDialog.Dial
         Bundle bundle = new Bundle();
         bundle.putInt(getString(R.string.bundle_from), INDEX);
         navController.navigate(R.id.action_completedListFragment_to_addByWebFragment, bundle);
+    }
+
+    @Override
+    public void isEmpty(boolean state) {
+        if(state)
+            binding.txtCompletedSearchempty.setVisibility(View.VISIBLE);
+        else
+            binding.txtCompletedSearchempty.setVisibility(View.INVISIBLE);
     }
 }
