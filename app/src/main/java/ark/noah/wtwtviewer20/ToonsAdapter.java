@@ -10,6 +10,8 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,9 +23,13 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
-public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> {
+public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> implements Filterable {
     private ArrayList<ToonsContainer> mData;
+    private ArrayList<ToonsContainer> mDataFiltered;
+
+    private ToonsAdapterFilterResultNotifier notifier;
 
     private Drawable foreground;
 
@@ -32,6 +38,11 @@ public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> 
     public static final int INDEX_SORT_BY_NAME = 0;
     public static final int INDEX_SORT_BY_DAY = 1;
     public static final int INDEX_SORT_BY_ID = 2;
+
+    public ToonsAdapter(ArrayList<ToonsContainer> list) {
+        mData = list;
+        mDataFiltered = list;
+    }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     @NonNull
@@ -63,7 +74,7 @@ public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ToonsContainer item = mData.get(position);
+        ToonsContainer item = mDataFiltered.get(position);
 
         holder.ToonName.setText(item.toonName);
         holder.ReleaseWeekday.setText(item.getAllReleaseDaysInString());
@@ -91,26 +102,77 @@ public class ToonsAdapter extends RecyclerView.Adapter<ToonsAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mDataFiltered.size();
+    }
+
+    public ToonsContainer getItem(int position) {
+        return mDataFiltered.get(position);
     }
 
     public int deleteAndGetDBIDof(ToonsContainer item) {
         int id = item.dbID;
-        int posToUpdate = mData.indexOf(item);
+        int posToUpdate = mDataFiltered.indexOf(item);
         mData.remove(item);
+        mDataFiltered.remove(item);
         notifyItemRemoved(posToUpdate);
         return id;
+    }
+
+    public void assignNotifier(ToonsAdapterFilterResultNotifier notifier) {
+        this.notifier = notifier;
     }
 
     public ArrayList<ToonsContainer> getmData() {
         return mData;
     }
-
-    public ToonsAdapter(ArrayList<ToonsContainer> list) {
-        mData = list;
+    public ArrayList<ToonsContainer> getmDataFiltered() {
+        return mDataFiltered;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence query) {
+                String queryText = query.toString();
+                if(queryText.isEmpty()) {
+                    mDataFiltered = mData   ;
+                } else {
+                    ArrayList<ToonsContainer> filteringList = new ArrayList<>();
+                    for(ToonsContainer toon : mData) {
+                        if(toon.toonName.toLowerCase(Locale.ROOT).contains(queryText.toLowerCase())) {
+                            filteringList.add(toon);
+                        }
+                    }
+                    mDataFiltered = filteringList;
+                }
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mDataFiltered;
+                return filterResults;
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                ArrayList<ToonsContainer> checkedCast = new ArrayList<>();
+                if(filterResults.values instanceof ArrayList<?>)
+                    for(Object obj : (ArrayList<?>) filterResults.values)
+                        if(obj instanceof ToonsContainer)
+                            checkedCast.add((ToonsContainer) obj);
+                if(!checkedCast.isEmpty())
+                    mDataFiltered = checkedCast;
+                if(notifier != null) notifier.isEmpty(checkedCast.isEmpty());
+                notifyDataSetChanged();
+            }
+        };
+    }
+
+    public interface ToonsAdapterFilterResultNotifier
+    {
+        void isEmpty(boolean state);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView Thumbnail;
         TextView ToonName;
         TextView ReleaseWeekday;

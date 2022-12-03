@@ -33,6 +33,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.SearchView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +42,7 @@ import java.util.Objects;
 
 import ark.noah.wtwtviewer20.databinding.FragmentAllListBinding;
 
-public class AllListFragment extends Fragment implements AddNewDialog.DialogInterface {
+public class AllListFragment extends Fragment implements AddNewDialog.DialogInterface, ToonsAdapter.ToonsAdapterFilterResultNotifier {
     public static final int INDEX = 0;
 
     private FragmentAllListBinding binding;
@@ -135,7 +136,7 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
             @Override
             public void onClick(View view, int position) {
                 Bundle bundle = new Bundle();
-                bundle.putParcelable(getString(R.string.bundle_toons), ((ToonsAdapter) Objects.requireNonNull(binding.alllistRec.getAdapter())).getmData().get(position));
+                bundle.putParcelable(getString(R.string.bundle_toons), ((ToonsAdapter) Objects.requireNonNull(binding.alllistRec.getAdapter())).getItem(position));
                 Navigation.findNavController(fragment.requireView()).navigate(R.id.action_allListFragment_to_episodesListFragment, bundle);
             }
 
@@ -206,6 +207,22 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
             public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
                 ((MenuBuilder) menu).setOptionalIconsVisible(true);
                 menuInflater.inflate(R.menu.sort, menu);
+                MenuItem searchMenuItem = menu.findItem(R.id.search);
+                SearchView searchView = (SearchView) searchMenuItem.getActionView();
+                searchView.setQueryHint(getString(R.string.txt_search));
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String query) {
+                        ToonsAdapter adapter = (ToonsAdapter) binding.alllistRec.getAdapter();
+                        Objects.requireNonNull(adapter).getFilter().filter(query);
+                        return false;
+                    }
+                });
             }
 
             @Override
@@ -321,7 +338,9 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         else if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_DAY) containers.sort(Comparator.comparing(tc -> tc.releaseWeekdays));
         else if(lastSortMethod == ToonsAdapter.INDEX_SORT_BY_ID) containers.sort(Comparator.comparing(tc -> tc.dbID));
         if(descending) Collections.reverse(containers);
-        binding.alllistRec.setAdapter(new ToonsAdapter(containers));
+        ToonsAdapter adapter = new ToonsAdapter(containers);
+        adapter.assignNotifier(this);
+        binding.alllistRec.setAdapter(adapter);
     }
 
     private int getSortingMethod(String value) {
@@ -348,5 +367,13 @@ public class AllListFragment extends Fragment implements AddNewDialog.DialogInte
         Bundle bundle = new Bundle();
         bundle.putInt(getString(R.string.bundle_from), INDEX);
         navController.navigate(R.id.action_allListFragment_to_addByWebFragment, bundle);
+    }
+
+    @Override
+    public void isEmpty(boolean state) {
+        if(state)
+            binding.txtAlllistSearchempty.setVisibility(View.VISIBLE);
+        else
+            binding.txtAlllistSearchempty.setVisibility(View.INVISIBLE);
     }
 }

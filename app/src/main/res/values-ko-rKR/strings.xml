@@ -96,4 +96,6 @@
     <string name="pref_desc_default_sorting_dir">기본 정렬 방향을 설정해 주세요</string>
     <string name="pref_array_default_sorting_dir_default_value">오름차순</string>
     <string name="pref_array_default_sorting_cat_default_value">제목순</string>
+    <string name="txt_search">검색</string>
+    <string name="txt_search_empty">검색 결과가 없습니다</string>
 </resources>
