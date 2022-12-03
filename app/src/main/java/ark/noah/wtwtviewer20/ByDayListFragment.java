@@ -424,7 +424,7 @@ public class ByDayListFragment extends Fragment implements AddNewDialog.DialogIn
             case SAT:
                 return binding.btnSat;
         }
-        return null;
+        return binding.btnUnspecified;
     }
 
     @Override
